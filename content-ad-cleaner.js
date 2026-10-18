@@ -11,13 +11,18 @@
 
   async function shouldRun() {
     try {
-      const {enabled = true, allowlist = []} = await chrome.storage.local.get(["enabled","allowlist"]);
+      const {enabled = true, allowlist = [], temporaryAllowlist = {}} = await chrome.storage.local.get(["enabled","allowlist","temporaryAllowlist"]);
       if (!enabled) return false;
       const host = location.hostname.toLowerCase();
-      return !(allowlist || []).some((item) => {
-        let domain = String(item).trim().toLowerCase().replace(/^https?:\/\//, "").split("/")[0].replace(/:\d+$/, "");
+      const permanent = (allowlist || []).some((item) => {
+        const domain = String(item).trim().toLowerCase().replace(/^https?:\/\//, "").split("/")[0].replace(/:\d+$/, "");
         return domain && (host === domain || host.endsWith("." + domain));
       });
+      const temporary = Object.entries(temporaryAllowlist || {}).some(([domain, expiresAt]) => {
+        const normalized = String(domain).toLowerCase();
+        return Number.isFinite(expiresAt) && expiresAt > Date.now() && (host === normalized || host.endsWith("." + normalized));
+      });
+      return !permanent && !temporary;
     } catch (_) { return true; }
   }
 
