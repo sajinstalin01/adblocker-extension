@@ -1,12 +1,19 @@
 {
   "manifest_version": 3,
   "name": "Rolex Key AdBlocker",
-  "version": "1.0.0",
-  "description": "Block many known ads, trackers, and pop-up sources with configurable site allowlisting.",
+  "version": "1.1.0",
+  "description": "Blocks many known ad and tracker requests, hides common ad slots, and automatically clicks video ad skip buttons where supported.",
   "permissions": ["storage", "declarativeNetRequest", "declarativeNetRequestFeedback"],
   "host_permissions": ["<all_urls>"],
   "action": {"default_title": "Rolex Key AdBlocker", "default_popup": "popup.html"},
   "background": {"service_worker": "background.js"},
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content-ad-cleaner.js"],
+      "run_at": "document_idle"
+    }
+  ],
   "declarative_net_request": {
     "rule_resources": [
       {"id": "base_ads", "enabled": true, "path": "rules/ads.json"},
