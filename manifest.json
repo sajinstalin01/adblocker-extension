@@ -1,21 +1,56 @@
 {
   "manifest_version": 3,
   "name": "Rolex Key AdBlocker",
-  "version": "2.0.0",
-  "description": "Ad and tracker blocking with safe filter updates, privacy controls, site statistics, and video-ad skip assistance.",
-  "permissions": ["storage", "alarms", "declarativeNetRequest", "declarativeNetRequestFeedback"],
-  "host_permissions": ["<all_urls>", "https://raw.githubusercontent.com/*"],
-  "action": {"default_title": "Rolex Key AdBlocker", "default_popup": "popup.html"},
-  "background": {"service_worker": "background.js"},
+  "version": "3.0.0",
+  "description": "Reliable ad and tracker blocking with validated filter updates, site controls, privacy settings, and video-ad skip assistance.",
+  "permissions": [
+    "storage",
+    "alarms",
+    "declarativeNetRequest",
+    "declarativeNetRequestFeedback"
+  ],
+  "host_permissions": [
+    "<all_urls>",
+    "https://raw.githubusercontent.com/*"
+  ],
+  "action": {
+    "default_title": "Rolex Key AdBlocker",
+    "default_popup": "popup.html"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
   "content_scripts": [
-    {"matches": ["http://*/*", "https://*/*"], "js": ["content-ad-cleaner.js"], "run_at": "document_idle"}
+    {
+      "matches": [
+        "http://*/*",
+        "https://*/*"
+      ],
+      "js": [
+        "content-ad-cleaner.js"
+      ],
+      "run_at": "document_idle"
+    }
   ],
   "declarative_net_request": {
     "rule_resources": [
-      {"id": "base_ads", "enabled": true, "path": "rules/ads.json"},
-      {"id": "base_trackers", "enabled": true, "path": "rules/trackers.json"},
-      {"id": "base_privacy", "enabled": true, "path": "rules/privacy.json"}
+      {
+        "id": "base_ads",
+        "enabled": true,
+        "path": "rules/ads.json"
+      },
+      {
+        "id": "base_trackers",
+        "enabled": true,
+        "path": "rules/trackers.json"
+      },
+      {
+        "id": "base_privacy",
+        "enabled": true,
+        "path": "rules/privacy.json"
+      }
     ]
   },
-  "options_page": "options.html"
+  "options_page": "options.html",
+  "minimum_chrome_version": "121"
 }
