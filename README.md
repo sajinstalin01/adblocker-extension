@@ -1,20 +1,21 @@
 # Rolex Key AdBlocker
 
-Version 2.0.0 — Chrome Manifest V3 extension focused on reliability and local-first privacy.
+Version 3.0.0 — Chrome Manifest V3 extension focused on reliability, recoverability, and local-first privacy.
 
 ## Features
-- Bundled network request filters for known ad and tracker domains
-- Daily refresh of trusted JSON block rules from this project's GitHub repository
-- Optional subscriptions to up to 10 HTTPS JSON-format community/custom filter lists
-- Validates remote rules before applying them; retains existing remote rules if an update fails
-- Rule namespaces prevent allowlist refreshes from deleting remote or custom rules
-- Popup pause/resume, current-site allowlisting, and tracker-filter control
-- Custom blocked domains
-- Best-effort common ad-slot hiding and YouTube skip-button automation
-- Dark/light/system settings theme
-- Local matched-rule statistics where Chrome exposes debugging events
-- Export/import for preferences, allowlists, custom domains and local stats
-- No remotely downloaded JavaScript and no external runtime dependencies
+- Bundled network filtering for known ad, tracker, and pop-up-ad domains
+- Daily refresh of trusted JSON block rules with manual update
+- Validates remote rules before atomic replacement; retains last-known-good rules when downloads or validation fail
+- Namespaced dynamic rules so allowlist, custom domain, and remote filter updates do not erase one another
+- Pause/resume that disables bundled, remote, and custom blocking rules
+- Separate global tracker and pop-up ad-network controls
+- Permanent and temporary website allowlists; temporary entries expire automatically
+- Optional subscriptions to up to 10 HTTPS JSON filter lists (maximum 500 rules each, 5,000 combined)
+- Custom blocked domains and common ad-slot cleanup
+- Best-effort YouTube skip-button helper
+- Dark/light/system themes, import/export, local statistics, and restore-defaults recovery
+- Automated CI checks for JSON, rule IDs, resource references, JavaScript syntax, and UI element references
+- No remotely downloaded JavaScript
 
 ## Install locally
 1. Download or clone this repository.
@@ -23,40 +24,22 @@ Version 2.0.0 — Chrome Manifest V3 extension focused on reliability and local-
 4. Choose **Load unpacked** and select the folder containing `manifest.json`.
 5. Reload the extension after updating files.
 
-## Filter updates and privacy
-The service worker checks the repository's `rules/ads.json` and `rules/trackers.json` once a day and also provides a manual update button. Remote JSON is validated and only block rules with supported fields are accepted. Bundled rules stay enabled as a fallback if the network or remote source is unavailable. Optional external lists must be JSON arrays in Chrome Declarative Net Request format (up to 500 rules each); standard EasyList/Adblock Plus text syntax is not parsed directly.
+## Filter update safety
+Remote lists must be HTTPS JSON arrays in Chrome Declarative Net Request block-rule format. Standard EasyList/Adblock Plus text lists are not parsed directly. All remote lists are validated before rules are replaced. Bundled rules remain active if an update fails. Only add community sources you trust.
 
-The extension needs access to visited websites to block requests and hide known ad containers. You can pause it or allowlist a site in the popup. Custom domain rules may break websites if used too broadly.
+## Statistics
+Detailed `onRuleMatchedDebug` counts are available in unpacked/developer builds only. Counts are therefore not guaranteed to represent every blocked request in a normal Chrome Web Store install.
 
-## Statistics limitation
-Chrome documents `declarativeNetRequestFeedback` and `onRuleMatchedDebug` as debugging features for unpacked extensions. Therefore detailed matched-request counts are best-effort developer statistics, not guaranteed totals in a normal Chrome Web Store installation.
-
-## Video-ad limitation
-Video skip automation is best-effort and depends on the current website UI. It cannot reliably remove every video ad or sponsorship embedded directly into a creator's video.
+## Video ads
+Skip automation depends on the current site UI and is best-effort. It cannot reliably remove every ad or sponsorship embedded directly into a creator's video.
 
 ## Permissions
-- `storage`: save preferences, custom rules and local stats
-- `alarms`: daily filter refresh
-- `declarativeNetRequest`: enforce packaged and dynamic rules
-- `declarativeNetRequestFeedback`: local developer/debug matched-rule statistics
-- `<all_urls>`: apply filtering and page cleanup across websites
+- `storage`: preferences, rules, subscriptions, and local stats
+- `alarms`: daily filter refresh and temporary allowlist expiry
+- `declarativeNetRequest`: bundled and dynamic network rules
+- `declarativeNetRequestFeedback`: developer matched-rule statistics
+- `<all_urls>`: filtering and ad-slot cleanup across websites
 - `raw.githubusercontent.com`: fetch this project's JSON filter files
-
-## Project layout
-```text
-manifest.json
-background.js
-content-ad-cleaner.js
-popup.html
-popup.css
-popup.js
-options.html
-options.css
-options.js
-rules/ads.json
-rules/trackers.json
-rules/privacy.json
-```
 
 ## License
 MIT — see `LICENSE`.
