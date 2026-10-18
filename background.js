@@ -1,7 +1,9 @@
 const DEFAULTS = {
   enabled: true,
   trackersEnabled: true,
+  privacyEnabled: true,
   allowlist: [],
+  temporaryAllowlist: {},
   customBlockDomains: [],
   communityFilterUrls: [],
   theme: "system",
@@ -19,27 +21,28 @@ const RULE_RANGES = {
   customDomains: { start: 300000, end: 300999 }
 };
 const UPDATE_ALARM = "rolex-filter-refresh";
+const TEMP_ALLOWLIST_ALARM = "rolex-temp-allowlist-expiry";
 let statsQueue = Promise.resolve();
 
 chrome.runtime.onInstalled.addListener(async () => {
   const saved = await chrome.storage.local.get(Object.keys(DEFAULTS));
   await chrome.storage.local.set({ ...DEFAULTS, ...saved });
   await applyEnabledState();
-  await refreshAllowlistRules();
-  await refreshCustomDomainRules();
   await ensureUpdateAlarm();
+  await ensureTemporaryAllowlistAlarm();
   await updateRemoteFilters();
 });
 
 chrome.runtime.onStartup.addListener(async () => {
+  await expireTemporaryAllowlist();
   await applyEnabledState();
-  await refreshAllowlistRules();
-  await refreshCustomDomainRules();
   await ensureUpdateAlarm();
+  await ensureTemporaryAllowlistAlarm();
 });
 
 chrome.alarms.onAlarm.addListener((alarm) => {
   if (alarm.name === UPDATE_ALARM) void updateRemoteFilters();
+  if (alarm.name === TEMP_ALLOWLIST_ALARM) void expireTemporaryAllowlist();
 });
 
 async function getSettings() {
@@ -49,7 +52,7 @@ async function getSettings() {
 async function applyEnabledState() {
   const settings = await getSettings();
   const enabledIds = settings.enabled
-    ? ["base_ads", "base_privacy", ...(settings.trackersEnabled ? ["base_trackers"] : [])]
+    ? ["base_ads", ...(settings.trackersEnabled ? ["base_trackers"] : []), ...(settings.privacyEnabled ? ["base_privacy"] : [])]
     : [];
   const allIds = ["base_ads", "base_trackers", "base_privacy"];
   await chrome.declarativeNetRequest.updateEnabledRulesets({
@@ -57,11 +60,17 @@ async function applyEnabledState() {
     disableRulesetIds: allIds.filter((id) => !enabledIds.includes(id))
   });
   await syncRemoteRules();
+  await refreshCustomDomainRules();
+  await refreshAllowlistRules();
 }
 
 async function syncRemoteRules() {
   const settings = await getSettings();
-  const cached = await chrome.storage.local.get({ remoteAdsRules: [], remoteTrackerRules: [], remoteCommunityRules: [] });
+  const cached = await chrome.storage.local.get({ remoteAdsRules: [], remoteTrackerRules: [], remoteCommunityRules: [], remoteCommunityRulesByUrl: {} });
+  const activeUrls = settings.communityFilterUrls || [];
+  const communityCached = Object.keys(cached.remoteCommunityRulesByUrl || {}).length
+    ? activeUrls.flatMap((url) => cached.remoteCommunityRulesByUrl[url] || [])
+    : (activeUrls.length ? (cached.remoteCommunityRules || []) : []);
   const existing = await chrome.declarativeNetRequest.getDynamicRules();
   const ownedIds = existing
     .filter((rule) => (rule.id >= RULE_RANGES.remoteAds.start && rule.id <= RULE_RANGES.remoteAds.end) ||
@@ -69,7 +78,7 @@ async function syncRemoteRules() {
       (rule.id >= RULE_RANGES.community.start && rule.id <= RULE_RANGES.community.end))
     .map((rule) => rule.id);
   const addRules = settings.enabled
-    ? [...(cached.remoteAdsRules || []), ...(settings.trackersEnabled ? (cached.remoteTrackerRules || []) : []), ...(cached.remoteCommunityRules || [])]
+    ? [...(cached.remoteAdsRules || []), ...(settings.trackersEnabled ? (cached.remoteTrackerRules || []) : []), ...communityCached]
     : [];
   await chrome.declarativeNetRequest.updateDynamicRules({ removeRuleIds: ownedIds, addRules });
 }
@@ -90,8 +99,12 @@ function normalizeDomain(value) {
 }
 
 async function refreshAllowlistRules() {
-  const { allowlist = [] } = await getSettings();
-  const hosts = [...new Set(allowlist.map(normalizeDomain).filter(Boolean))].slice(0, 500);
+  const settings = await getSettings();
+  const now = Date.now();
+  const temporary = Object.entries(settings.temporaryAllowlist || {})
+    .filter(([host, expiresAt]) => normalizeDomain(host) && Number.isFinite(expiresAt) && expiresAt > now)
+    .map(([host]) => host);
+  const hosts = [...new Set([...(settings.allowlist || []), ...temporary].map(normalizeDomain).filter(Boolean))].slice(0, 500);
   const range = RULE_RANGES.allowlist;
   const rules = hosts.map((host, index) => ({
     id: range.start + index,
@@ -103,8 +116,8 @@ async function refreshAllowlistRules() {
 }
 
 async function refreshCustomDomainRules() {
-  const { customBlockDomains = [] } = await getSettings();
-  const hosts = [...new Set(customBlockDomains.map(normalizeDomain).filter(Boolean))].slice(0, 500);
+  const settings = await getSettings();
+  const hosts = settings.enabled ? [...new Set((settings.customBlockDomains || []).map(normalizeDomain).filter(Boolean))].slice(0, 500) : [];
   const range = RULE_RANGES.customDomains;
   const rules = hosts.map((host, index) => ({
     id: range.start + index,
@@ -120,6 +133,19 @@ async function refreshCustomDomainRules() {
 
 async function ensureUpdateAlarm() {
   await chrome.alarms.create(UPDATE_ALARM, { periodInMinutes: 1440, delayInMinutes: 5 });
+}
+async function ensureTemporaryAllowlistAlarm() {
+  await chrome.alarms.create(TEMP_ALLOWLIST_ALARM, { periodInMinutes: 15, delayInMinutes: 15 });
+}
+async function expireTemporaryAllowlist() {
+  const { temporaryAllowlist = {} } = await getSettings();
+  const now = Date.now();
+  const active = Object.fromEntries(Object.entries(temporaryAllowlist)
+    .filter(([host, expiresAt]) => normalizeDomain(host) && Number.isFinite(expiresAt) && expiresAt > now));
+  if (Object.keys(active).length !== Object.keys(temporaryAllowlist).length) {
+    await chrome.storage.local.set({ temporaryAllowlist: active });
+  }
+  await refreshAllowlistRules();
 }
 
 function validateRemoteRules(data, baseId, maxRules = 2000) {
@@ -140,7 +166,7 @@ function validateRemoteRules(data, baseId, maxRules = 2000) {
       condition: {
         urlFilter: rule.condition.urlFilter.slice(0, 1500),
         resourceTypes: types,
-        ...(Array.isArray(rule.condition.requestDomains) ? { requestDomains: rule.condition.requestDomains.filter((d) => typeof d === "string" && normalizeDomain(d)).slice(0, 50) } : {})
+        ...(Array.isArray(rule.condition.requestDomains) ? { requestDomains: rule.condition.requestDomains.map(normalizeDomain).filter(Boolean).slice(0, 50) } : {})
       }
     };
   });
@@ -162,12 +188,14 @@ async function updateRemoteFilters() {
     const ads = validateRemoteRules(parsed[0], RULE_RANGES.remoteAds.start);
     const trackers = validateRemoteRules(parsed[1], RULE_RANGES.remoteTrackers.start);
     const community = [];
+    const communityByUrl = {};
     for (let i = 0; i < communityUrls.length; i++) {
       const data = parsed[i + 2];
-      const validated = validateRemoteRules(data, RULE_RANGES.community.start + community.length, 500);
+      const validated = validateRemoteRules(data, RULE_RANGES.community.start + i * 500, 500);
+      communityByUrl[communityUrls[i]] = validated;
       community.push(...validated);
-      if (community.length > 10000) throw new Error("Combined community filter rules exceed the supported limit.");
     }
+    if (community.length > 5000) throw new Error("Combined community filter rules exceed the 5,000-rule subscription limit.");
     const existing = await chrome.declarativeNetRequest.getDynamicRules();
     const ownedIds = existing
       .filter((rule) => (rule.id >= RULE_RANGES.remoteAds.start && rule.id <= RULE_RANGES.remoteAds.end) ||
@@ -181,9 +209,11 @@ async function updateRemoteFilters() {
       remoteAdsRules: ads,
       remoteTrackerRules: trackers,
       remoteCommunityRules: community,
+      remoteCommunityRulesByUrl: communityByUrl,
       filterUpdate: { status: "success", updatedAt, message: "Filter rules refreshed successfully." }
     });
   } catch (error) {
+    try { await syncRemoteRules(); } catch (_) {}
     await chrome.storage.local.set({
       filterUpdate: {
         ...previous.filterUpdate,
@@ -207,25 +237,11 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
 
 chrome.storage.onChanged.addListener((changes, area) => {
   if (area !== "local") return;
-  if (changes.enabled || changes.trackersEnabled) void applyEnabledState();
-  if (changes.allowlist) void refreshAllowlistRules();
+  if (changes.enabled || changes.trackersEnabled || changes.privacyEnabled) void applyEnabledState();
+  if (changes.allowlist || changes.temporaryAllowlist) void refreshAllowlistRules();
   if (changes.customBlockDomains) void refreshCustomDomainRules();
-  if (changes.communityFilterUrls) {
-    const oldUrls = changes.communityFilterUrls.oldValue || [];
-    const newUrls = changes.communityFilterUrls.newValue || [];
-    if (oldUrls.length || newUrls.length) void clearCommunityRulesAndRefresh();
-  }
+  if (changes.communityFilterUrls) void updateRemoteFilters();
 });
-
-async function clearCommunityRulesAndRefresh() {
-  const existing = await chrome.declarativeNetRequest.getDynamicRules();
-  const removeRuleIds = existing
-    .filter((rule) => rule.id >= RULE_RANGES.community.start && rule.id <= RULE_RANGES.community.end)
-    .map((rule) => rule.id);
-  if (removeRuleIds.length) await chrome.declarativeNetRequest.updateDynamicRules({ removeRuleIds });
-  await chrome.storage.local.set({ remoteCommunityRules: [] });
-  await updateRemoteFilters();
-}
 
 chrome.declarativeNetRequest.onRuleMatchedDebug?.addListener((info) => {
   statsQueue = statsQueue.then(async () => {
