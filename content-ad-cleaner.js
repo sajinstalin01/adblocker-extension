@@ -26,9 +26,35 @@
       if (element.hasAttribute(HIDDEN_ATTR)) continue;
       if (element.closest("header, nav, main") &&
           !element.matches("ins.adsbygoogle, [data-ad-slot], [data-ad-unit], iframe, [id^='google_ads'], [id^='div-gpt-ad']")) continue;
+      element.dataset.rolexOriginalDisplay = element.style.getPropertyValue("display");
+      element.dataset.rolexOriginalVisibility = element.style.getPropertyValue("visibility");
       element.setAttribute(HIDDEN_ATTR,"1");
       element.style.setProperty("display","none","important");
       element.style.setProperty("visibility","hidden","important");
+    }
+  }
+
+  function restorePage() {
+    for (const element of document.querySelectorAll("[" + HIDDEN_ATTR + "]")) {
+      const display = element.dataset.rolexOriginalDisplay || "";
+      const visibility = element.dataset.rolexOriginalVisibility || "";
+      if (display) element.style.setProperty("display", display); else element.style.removeProperty("display");
+      if (visibility) element.style.setProperty("visibility", visibility); else element.style.removeProperty("visibility");
+      element.removeAttribute(HIDDEN_ATTR);
+      delete element.dataset.rolexOriginalDisplay;
+      delete element.dataset.rolexOriginalVisibility;
+    }
+    const video = document.querySelector("video");
+    if (video) {
+      if (video.dataset.rolexAdMuted === "1") {
+        video.muted = video.dataset.rolexWasMuted === "1";
+        delete video.dataset.rolexAdMuted;
+        delete video.dataset.rolexWasMuted;
+      }
+      if (video.dataset.rolexAdRate) {
+        video.playbackRate = Number(video.dataset.rolexAdRate) || 1;
+        delete video.dataset.rolexAdRate;
+      }
     }
   }
 
@@ -54,7 +80,7 @@
     }
   }
 
-  async function cleanup() { if (!(await shouldRun())) return; hideAdSlots(); skipVideoAds(); }
+  async function cleanup() { if (!(await shouldRun())) { restorePage(); return; } hideAdSlots(); skipVideoAds(); }
   function queueCleanup() {
     if (queued) return; queued=true;
     requestAnimationFrame(() => { queued=false; void cleanup(); });
