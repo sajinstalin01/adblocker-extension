@@ -3,6 +3,7 @@ const DEFAULTS = {
   trackersEnabled: true,
   allowlist: [],
   customBlockDomains: [],
+  communityFilterUrls: [],
   theme: "system",
   blockedCount: 0,
   statsBySite: {},
@@ -14,6 +15,7 @@ const RULE_RANGES = {
   allowlist: { start: 100000, end: 100999 },
   remoteAds: { start: 200000, end: 204999 },
   remoteTrackers: { start: 210000, end: 214999 },
+  community: { start: 220000, end: 229999 },
   customDomains: { start: 300000, end: 300999 }
 };
 const UPDATE_ALARM = "rolex-filter-refresh";
@@ -59,14 +61,15 @@ async function applyEnabledState() {
 
 async function syncRemoteRules() {
   const settings = await getSettings();
-  const cached = await chrome.storage.local.get({ remoteAdsRules: [], remoteTrackerRules: [] });
+  const cached = await chrome.storage.local.get({ remoteAdsRules: [], remoteTrackerRules: [], remoteCommunityRules: [] });
   const existing = await chrome.declarativeNetRequest.getDynamicRules();
   const ownedIds = existing
     .filter((rule) => (rule.id >= RULE_RANGES.remoteAds.start && rule.id <= RULE_RANGES.remoteAds.end) ||
-      (rule.id >= RULE_RANGES.remoteTrackers.start && rule.id <= RULE_RANGES.remoteTrackers.end))
+      (rule.id >= RULE_RANGES.remoteTrackers.start && rule.id <= RULE_RANGES.remoteTrackers.end) ||
+      (rule.id >= RULE_RANGES.community.start && rule.id <= RULE_RANGES.community.end))
     .map((rule) => rule.id);
   const addRules = settings.enabled
-    ? [...(cached.remoteAdsRules || []), ...(settings.trackersEnabled ? (cached.remoteTrackerRules || []) : [])]
+    ? [...(cached.remoteAdsRules || []), ...(settings.trackersEnabled ? (cached.remoteTrackerRules || []) : []), ...(cached.remoteCommunityRules || [])]
     : [];
   await chrome.declarativeNetRequest.updateDynamicRules({ removeRuleIds: ownedIds, addRules });
 }
@@ -119,8 +122,8 @@ async function ensureUpdateAlarm() {
   await chrome.alarms.create(UPDATE_ALARM, { periodInMinutes: 1440, delayInMinutes: 5 });
 }
 
-function validateRemoteRules(data, baseId) {
-  if (!Array.isArray(data) || data.length > 2000) throw new Error("Filter file must be an array of at most 2,000 rules.");
+function validateRemoteRules(data, baseId, maxRules = 2000) {
+  if (!Array.isArray(data) || data.length > maxRules) throw new Error("Filter file exceeds its permitted rule limit.");
   const resourceTypes = new Set(["main_frame", "sub_frame", "stylesheet", "script", "image", "font", "object", "xmlhttprequest", "ping", "media", "websocket", "other"]);
   return data.map((rule, index) => {
     if (!rule || rule.action?.type !== "block" || typeof rule.condition?.urlFilter !== "string" || !rule.condition.urlFilter.trim()) {
@@ -147,26 +150,37 @@ async function updateRemoteFilters() {
   const previous = await getSettings();
   try {
     const root = "https://raw.githubusercontent.com/sajinstalin01/adblocker-extension/main/rules/";
+    const current = await getSettings();
+    const communityUrls = [...new Set((current.communityFilterUrls || []).filter((url) => typeof url === "string" && url.startsWith("https://")))].slice(0, 10);
     const responses = await Promise.all([
       fetch(root + "ads.json", { cache: "no-store" }),
-      fetch(root + "trackers.json", { cache: "no-store" })
+      fetch(root + "trackers.json", { cache: "no-store" }),
+      ...communityUrls.map((url) => fetch(url, { cache: "no-store" }))
     ]);
-    if (responses.some((response) => !response.ok)) throw new Error("Could not download one or more filter files.");
-    const [adsData, trackersData] = await Promise.all(responses.map((response) => response.json()));
-    const ads = validateRemoteRules(adsData, RULE_RANGES.remoteAds.start);
-    const trackers = validateRemoteRules(trackersData, RULE_RANGES.remoteTrackers.start);
-    const current = await getSettings();
+    if (responses.some((response) => !response.ok)) throw new Error("Could not download one or more filter files. Previous rules were retained.");
+    const parsed = await Promise.all(responses.map((response) => response.json()));
+    const ads = validateRemoteRules(parsed[0], RULE_RANGES.remoteAds.start);
+    const trackers = validateRemoteRules(parsed[1], RULE_RANGES.remoteTrackers.start);
+    const community = [];
+    for (let i = 0; i < communityUrls.length; i++) {
+      const data = parsed[i + 2];
+      const validated = validateRemoteRules(data, RULE_RANGES.community.start + community.length, 500);
+      community.push(...validated);
+      if (community.length > 10000) throw new Error("Combined community filter rules exceed the supported limit.");
+    }
     const existing = await chrome.declarativeNetRequest.getDynamicRules();
     const ownedIds = existing
       .filter((rule) => (rule.id >= RULE_RANGES.remoteAds.start && rule.id <= RULE_RANGES.remoteAds.end) ||
-        (rule.id >= RULE_RANGES.remoteTrackers.start && rule.id <= RULE_RANGES.remoteTrackers.end))
+        (rule.id >= RULE_RANGES.remoteTrackers.start && rule.id <= RULE_RANGES.remoteTrackers.end) ||
+        (rule.id >= RULE_RANGES.community.start && rule.id <= RULE_RANGES.community.end))
       .map((rule) => rule.id);
-    const addRules = current.enabled ? [...ads, ...(current.trackersEnabled ? trackers : [])] : [];
+    const addRules = current.enabled ? [...ads, ...(current.trackersEnabled ? trackers : []), ...community] : [];
     await chrome.declarativeNetRequest.updateDynamicRules({ removeRuleIds: ownedIds, addRules });
     const updatedAt = new Date().toISOString();
     await chrome.storage.local.set({
       remoteAdsRules: ads,
       remoteTrackerRules: trackers,
+      remoteCommunityRules: community,
       filterUpdate: { status: "success", updatedAt, message: "Filter rules refreshed successfully." }
     });
   } catch (error) {
@@ -196,6 +210,7 @@ chrome.storage.onChanged.addListener((changes, area) => {
   if (changes.enabled || changes.trackersEnabled) void applyEnabledState();
   if (changes.allowlist) void refreshAllowlistRules();
   if (changes.customBlockDomains) void refreshCustomDomainRules();
+  if (changes.communityFilterUrls) void updateRemoteFilters();
 });
 
 chrome.declarativeNetRequest.onRuleMatchedDebug?.addListener((info) => {
