@@ -5,6 +5,7 @@ Version 2.0.0 — Chrome Manifest V3 extension focused on reliability and local-
 ## Features
 - Bundled network request filters for known ad and tracker domains
 - Daily refresh of trusted JSON block rules from this project's GitHub repository
+- Optional subscriptions to up to 10 HTTPS JSON-format community/custom filter lists
 - Validates remote rules before applying them; retains existing remote rules if an update fails
 - Rule namespaces prevent allowlist refreshes from deleting remote or custom rules
 - Popup pause/resume, current-site allowlisting, and tracker-filter control
@@ -23,7 +24,7 @@ Version 2.0.0 — Chrome Manifest V3 extension focused on reliability and local-
 5. Reload the extension after updating files.
 
 ## Filter updates and privacy
-The service worker checks the repository's `rules/ads.json` and `rules/trackers.json` once a day and also provides a manual update button. Remote JSON is validated and only block rules with supported fields are accepted. Bundled rules stay enabled as a fallback if the network or remote source is unavailable.
+The service worker checks the repository's `rules/ads.json` and `rules/trackers.json` once a day and also provides a manual update button. Remote JSON is validated and only block rules with supported fields are accepted. Bundled rules stay enabled as a fallback if the network or remote source is unavailable. Optional external lists must be JSON arrays in Chrome Declarative Net Request format (up to 500 rules each); standard EasyList/Adblock Plus text syntax is not parsed directly.
 
 The extension needs access to visited websites to block requests and hide known ad containers. You can pause it or allowlist a site in the popup. Custom domain rules may break websites if used too broadly.
 
