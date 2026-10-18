@@ -1,18 +1,22 @@
-const $ = id => document.getElementById(id);
+const $ = (id) => document.getElementById(id);
 let currentHost = "", isAllowlisted = false;
 async function render() {
-  const settings = await chrome.storage.local.get({ enabled: true, allowlist: [], blockedCount: 0 });
+  const settings = await chrome.storage.local.get({
+    enabled: true, trackersEnabled: true, allowlist: [], blockedCount: 0, filterUpdate: {status:"not-run"}
+  });
   $("blocked").textContent = Number(settings.blockedCount || 0).toLocaleString();
   $("status").textContent = settings.enabled ? "Protection enabled" : "Protection paused";
   $("dot").classList.toggle("off", !settings.enabled);
   $("toggle").classList.toggle("off", !settings.enabled);
   $("toggle").setAttribute("aria-label", settings.enabled ? "Pause protection" : "Enable protection");
+  $("trackerState").textContent = settings.trackersEnabled ? "On" : "Off";
+  $("updateState").textContent = settings.filterUpdate?.status === "success" ? "Updated" : settings.filterUpdate?.status === "error" ? "Retry needed" : "Bundled";
   try {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     const url = new URL(tab.url);
-    currentHost = url.hostname;
+    currentHost = url.hostname.toLowerCase();
     if (!["http:", "https:"].includes(url.protocol)) throw new Error("unsupported");
-    isAllowlisted = (settings.allowlist || []).some(h => currentHost === h || currentHost.endsWith("." + h));
+    isAllowlisted = (settings.allowlist || []).some((h) => currentHost === h || currentHost.endsWith("." + h));
     $("hostname").textContent = currentHost;
     $("siteState").textContent = isAllowlisted ? "Allowed" : (settings.enabled ? "Protected" : "Paused");
     $("allow").textContent = isAllowlisted ? "Remove allow" : "Allow site";
@@ -32,7 +36,7 @@ $("toggle").addEventListener("click", async () => {
 $("allow").addEventListener("click", async () => {
   if (!currentHost) return;
   const { allowlist = [] } = await chrome.storage.local.get("allowlist");
-  const next = isAllowlisted ? allowlist.filter(h => !(currentHost === h || currentHost.endsWith("." + h))) : [...new Set([...allowlist, currentHost])];
+  const next = isAllowlisted ? allowlist.filter((h) => !(currentHost === h || currentHost.endsWith("." + h))) : [...new Set([...allowlist, currentHost])];
   await chrome.storage.local.set({ allowlist: next });
   await render();
 });
