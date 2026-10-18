@@ -210,14 +210,29 @@ chrome.storage.onChanged.addListener((changes, area) => {
   if (changes.enabled || changes.trackersEnabled) void applyEnabledState();
   if (changes.allowlist) void refreshAllowlistRules();
   if (changes.customBlockDomains) void refreshCustomDomainRules();
-  if (changes.communityFilterUrls) void updateRemoteFilters();
+  if (changes.communityFilterUrls) {
+    const oldUrls = changes.communityFilterUrls.oldValue || [];
+    const newUrls = changes.communityFilterUrls.newValue || [];
+    if (oldUrls.length || newUrls.length) void clearCommunityRulesAndRefresh();
+  }
 });
+
+async function clearCommunityRulesAndRefresh() {
+  const existing = await chrome.declarativeNetRequest.getDynamicRules();
+  const removeRuleIds = existing
+    .filter((rule) => rule.id >= RULE_RANGES.community.start && rule.id <= RULE_RANGES.community.end)
+    .map((rule) => rule.id);
+  if (removeRuleIds.length) await chrome.declarativeNetRequest.updateDynamicRules({ removeRuleIds });
+  await chrome.storage.local.set({ remoteCommunityRules: [] });
+  await updateRemoteFilters();
+}
 
 chrome.declarativeNetRequest.onRuleMatchedDebug?.addListener((info) => {
   statsQueue = statsQueue.then(async () => {
     const settings = await getSettings();
     const host = (() => {
-      try { return new URL(info.request?.url || "").hostname; } catch (_) { return "unknown"; }
+      try { return new URL(info.request?.initiator || info.request?.documentUrl || info.request?.url || "").hostname; }
+      catch (_) { return "unknown"; }
     })();
     const statsBySite = { ...(settings.statsBySite || {}) };
     statsBySite[host] = (statsBySite[host] || 0) + 1;
