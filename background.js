@@ -54,6 +54,21 @@ async function applyEnabledState() {
     enableRulesetIds: enabledIds,
     disableRulesetIds: allIds.filter((id) => !enabledIds.includes(id))
   });
+  await syncRemoteRules();
+}
+
+async function syncRemoteRules() {
+  const settings = await getSettings();
+  const cached = await chrome.storage.local.get({ remoteAdsRules: [], remoteTrackerRules: [] });
+  const existing = await chrome.declarativeNetRequest.getDynamicRules();
+  const ownedIds = existing
+    .filter((rule) => (rule.id >= RULE_RANGES.remoteAds.start && rule.id <= RULE_RANGES.remoteAds.end) ||
+      (rule.id >= RULE_RANGES.remoteTrackers.start && rule.id <= RULE_RANGES.remoteTrackers.end))
+    .map((rule) => rule.id);
+  const addRules = settings.enabled
+    ? [...(cached.remoteAdsRules || []), ...(settings.trackersEnabled ? (cached.remoteTrackerRules || []) : [])]
+    : [];
+  await chrome.declarativeNetRequest.updateDynamicRules({ removeRuleIds: ownedIds, addRules });
 }
 
 async function replaceOwnedDynamicRules(range, rules) {
@@ -140,14 +155,18 @@ async function updateRemoteFilters() {
     const [adsData, trackersData] = await Promise.all(responses.map((response) => response.json()));
     const ads = validateRemoteRules(adsData, RULE_RANGES.remoteAds.start);
     const trackers = validateRemoteRules(trackersData, RULE_RANGES.remoteTrackers.start);
+    const current = await getSettings();
     const existing = await chrome.declarativeNetRequest.getDynamicRules();
     const ownedIds = existing
       .filter((rule) => (rule.id >= RULE_RANGES.remoteAds.start && rule.id <= RULE_RANGES.remoteAds.end) ||
         (rule.id >= RULE_RANGES.remoteTrackers.start && rule.id <= RULE_RANGES.remoteTrackers.end))
       .map((rule) => rule.id);
-    await chrome.declarativeNetRequest.updateDynamicRules({ removeRuleIds: ownedIds, addRules: [...ads, ...trackers] });
+    const addRules = current.enabled ? [...ads, ...(current.trackersEnabled ? trackers : [])] : [];
+    await chrome.declarativeNetRequest.updateDynamicRules({ removeRuleIds: ownedIds, addRules });
     const updatedAt = new Date().toISOString();
     await chrome.storage.local.set({
+      remoteAdsRules: ads,
+      remoteTrackerRules: trackers,
       filterUpdate: { status: "success", updatedAt, message: "Filter rules refreshed successfully." }
     });
   } catch (error) {
