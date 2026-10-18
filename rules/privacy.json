@@ -6,7 +6,7 @@
       "type": "block"
     },
     "condition": {
-      "urlFilter": "||google-analytics.com^",
+      "urlFilter": "||popads.net^",
       "resourceTypes": [
         "script",
         "image",
@@ -24,7 +24,7 @@
       "type": "block"
     },
     "condition": {
-      "urlFilter": "||googletagmanager.com^",
+      "urlFilter": "||popcash.net^",
       "resourceTypes": [
         "script",
         "image",
@@ -42,7 +42,7 @@
       "type": "block"
     },
     "condition": {
-      "urlFilter": "||connect.facebook.net^",
+      "urlFilter": "||propellerads.com^",
       "resourceTypes": [
         "script",
         "image",
@@ -60,7 +60,7 @@
       "type": "block"
     },
     "condition": {
-      "urlFilter": "||facebook.com/tr^",
+      "urlFilter": "||onclickads.net^",
       "resourceTypes": [
         "script",
         "image",
@@ -78,7 +78,7 @@
       "type": "block"
     },
     "condition": {
-      "urlFilter": "||hotjar.com^",
+      "urlFilter": "||exoclick.com^",
       "resourceTypes": [
         "script",
         "image",
@@ -96,186 +96,6 @@
       "type": "block"
     },
     "condition": {
-      "urlFilter": "||mixpanel.com^",
-      "resourceTypes": [
-        "script",
-        "image",
-        "xmlhttprequest",
-        "sub_frame",
-        "ping",
-        "other"
-      ]
-    }
-  },
-  {
-    "id": 207,
-    "priority": 1,
-    "action": {
-      "type": "block"
-    },
-    "condition": {
-      "urlFilter": "||segment.io^",
-      "resourceTypes": [
-        "script",
-        "image",
-        "xmlhttprequest",
-        "sub_frame",
-        "ping",
-        "other"
-      ]
-    }
-  },
-  {
-    "id": 208,
-    "priority": 1,
-    "action": {
-      "type": "block"
-    },
-    "condition": {
-      "urlFilter": "||amplitude.com^",
-      "resourceTypes": [
-        "script",
-        "image",
-        "xmlhttprequest",
-        "sub_frame",
-        "ping",
-        "other"
-      ]
-    }
-  },
-  {
-    "id": 209,
-    "priority": 1,
-    "action": {
-      "type": "block"
-    },
-    "condition": {
-      "urlFilter": "||clarity.ms^",
-      "resourceTypes": [
-        "script",
-        "image",
-        "xmlhttprequest",
-        "sub_frame",
-        "ping",
-        "other"
-      ]
-    }
-  },
-  {
-    "id": 210,
-    "priority": 1,
-    "action": {
-      "type": "block"
-    },
-    "condition": {
-      "urlFilter": "||scorecardresearch.com^",
-      "resourceTypes": [
-        "script",
-        "image",
-        "xmlhttprequest",
-        "sub_frame",
-        "ping",
-        "other"
-      ]
-    }
-  },
-  {
-    "id": 211,
-    "priority": 1,
-    "action": {
-      "type": "block"
-    },
-    "condition": {
-      "urlFilter": "||popads.net^",
-      "resourceTypes": [
-        "script",
-        "image",
-        "xmlhttprequest",
-        "sub_frame",
-        "ping",
-        "other"
-      ]
-    }
-  },
-  {
-    "id": 212,
-    "priority": 1,
-    "action": {
-      "type": "block"
-    },
-    "condition": {
-      "urlFilter": "||popcash.net^",
-      "resourceTypes": [
-        "script",
-        "image",
-        "xmlhttprequest",
-        "sub_frame",
-        "ping",
-        "other"
-      ]
-    }
-  },
-  {
-    "id": 213,
-    "priority": 1,
-    "action": {
-      "type": "block"
-    },
-    "condition": {
-      "urlFilter": "||propellerads.com^",
-      "resourceTypes": [
-        "script",
-        "image",
-        "xmlhttprequest",
-        "sub_frame",
-        "ping",
-        "other"
-      ]
-    }
-  },
-  {
-    "id": 214,
-    "priority": 1,
-    "action": {
-      "type": "block"
-    },
-    "condition": {
-      "urlFilter": "||onclickads.net^",
-      "resourceTypes": [
-        "script",
-        "image",
-        "xmlhttprequest",
-        "sub_frame",
-        "ping",
-        "other"
-      ]
-    }
-  },
-  {
-    "id": 215,
-    "priority": 1,
-    "action": {
-      "type": "block"
-    },
-    "condition": {
-      "urlFilter": "||exoclick.com^",
-      "resourceTypes": [
-        "script",
-        "image",
-        "xmlhttprequest",
-        "sub_frame",
-        "ping",
-        "other"
-      ]
-    }
-  },
-  {
-    "id": 216,
-    "priority": 1,
-    "action": {
-      "type": "block"
-    },
-    "condition": {
       "urlFilter": "||adsterra.com^",
       "resourceTypes": [
         "script",
@@ -288,7 +108,7 @@
     }
   },
   {
-    "id": 217,
+    "id": 207,
     "priority": 1,
     "action": {
       "type": "block"
