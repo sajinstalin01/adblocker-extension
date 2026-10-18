@@ -2,12 +2,13 @@ const $ = (id) => document.getElementById(id);
 let currentHost = "", isAllowlisted = false, temporaryAllowHost = "";
 async function render() {
   const settings = await chrome.storage.local.get({
-    enabled: true, trackersEnabled: true, allowlist: [], temporaryAllowlist: {}, blockedCount: 0, theme: "system", filterUpdate: {status:"not-run"}
+    enabled: true, trackersEnabled: true, allowlist: [], temporaryAllowlist: {}, blockedCount: 0, theme: "system", filterUpdate: {status:"not-run"}, popupLayout:"comfortable", popupAccent:"mint", hidePopupStats:false, locale:"en"
   });
   const theme = settings.theme === "system"
     ? (matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark")
     : settings.theme;
   document.documentElement.dataset.theme = theme;
+  document.documentElement.dataset.layout=settings.popupLayout;document.documentElement.dataset.accent=settings.popupAccent;document.documentElement.lang=settings.locale==="ml"?"ml":"en";$("stats").hidden=!!settings.hidePopupStats;
   $("blocked").textContent = Number(settings.blockedCount || 0).toLocaleString();
   $("status").textContent = settings.enabled ? "Protection enabled" : "Protection paused";
   $("dot").classList.toggle("off", !settings.enabled);
