@@ -2,6 +2,7 @@ const DEFAULTS = {
   enabled: true,
   trackersEnabled: true,
   privacyEnabled: true,
+  antiAdblockEnabled:false, readingModeEnabled:false, protectionProfile:"balanced", locale:"en", popupLayout:"comfortable", popupAccent:"mint", hidePopupStats:false, onboardingComplete:false, releaseNotesPending:false, lastSeenVersion:"3.0.0",
   allowlist: [],
   temporaryAllowlist: {},
   customBlockDomains: [],
@@ -24,15 +25,18 @@ const UPDATE_ALARM = "rolex-filter-refresh";
 const TEMP_ALLOWLIST_ALARM = "rolex-temp-allowlist-expiry";
 let statsQueue = Promise.resolve();
 
-chrome.runtime.onInstalled.addListener(async () => {
+chrome.runtime.onInstalled.addListener(async (details) => {
   const saved = await chrome.storage.local.get(Object.keys(DEFAULTS));
-  await chrome.storage.local.set({ ...DEFAULTS, ...saved });
+  const currentVersion=chrome.runtime.getManifest().version;
+  await chrome.storage.local.set({ ...DEFAULTS, ...saved, lastSeenVersion:currentVersion });
   await applyEnabledState();
   await ensureUpdateAlarm();
   await ensureTemporaryAllowlistAlarm();
+  if(details.reason==="install"){await chrome.storage.local.set({onboardingComplete:false});await chrome.tabs.create({url:chrome.runtime.getURL("welcome.html")});}else if(details.reason==="update"&&details.previousVersion!==currentVersion){await chrome.storage.local.set({releaseNotesPending:true});}
   await updateRemoteFilters();
 });
 
+chrome.commands.onCommand.addListener(async command=>{if(command!=="toggle-reading-mode")return;const [tab]=await chrome.tabs.query({active:true,currentWindow:true});if(tab?.id)chrome.tabs.sendMessage(tab.id,{type:"toggle-reading-mode"}).catch(()=>{});});
 chrome.runtime.onStartup.addListener(async () => {
   await expireTemporaryAllowlist();
   await applyEnabledState();
