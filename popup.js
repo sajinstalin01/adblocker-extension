@@ -1,8 +1,8 @@
 const $ = (id) => document.getElementById(id);
-let currentHost = "", isAllowlisted = false;
+let currentHost = "", isAllowlisted = false, temporaryAllowHost = "";
 async function render() {
   const settings = await chrome.storage.local.get({
-    enabled: true, trackersEnabled: true, allowlist: [], blockedCount: 0, theme: "system", filterUpdate: {status:"not-run"}
+    enabled: true, trackersEnabled: true, allowlist: [], temporaryAllowlist: {}, blockedCount: 0, theme: "system", filterUpdate: {status:"not-run"}
   });
   const theme = settings.theme === "system"
     ? (matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark")
@@ -20,7 +20,8 @@ async function render() {
     const url = new URL(tab.url);
     currentHost = url.hostname.toLowerCase();
     if (!["http:", "https:"].includes(url.protocol)) throw new Error("unsupported");
-    isAllowlisted = (settings.allowlist || []).some((h) => currentHost === h || currentHost.endsWith("." + h));
+    temporaryAllowHost = Object.entries(settings.temporaryAllowlist || {}).find(([h, expiresAt]) => expiresAt > Date.now() && (currentHost === h || currentHost.endsWith("." + h)))?.[0] || "";
+    isAllowlisted = (settings.allowlist || []).some((h) => currentHost === h || currentHost.endsWith("." + h)) || !!temporaryAllowHost;
     $("hostname").textContent = currentHost;
     $("siteState").textContent = isAllowlisted ? "Allowed" : (settings.enabled ? "Protected" : "Paused");
     $("allow").textContent = isAllowlisted ? "Remove allow" : "Allow site";
@@ -39,9 +40,15 @@ $("toggle").addEventListener("click", async () => {
 });
 $("allow").addEventListener("click", async () => {
   if (!currentHost) return;
-  const { allowlist = [] } = await chrome.storage.local.get("allowlist");
-  const next = isAllowlisted ? allowlist.filter((h) => !(currentHost === h || currentHost.endsWith("." + h))) : [...new Set([...allowlist, currentHost])];
-  await chrome.storage.local.set({ allowlist: next });
+  if (temporaryAllowHost) {
+    const { temporaryAllowlist = {} } = await chrome.storage.local.get("temporaryAllowlist");
+    const nextTemporary = { ...temporaryAllowlist }; delete nextTemporary[temporaryAllowHost];
+    await chrome.storage.local.set({ temporaryAllowlist: nextTemporary });
+  } else {
+    const { allowlist = [] } = await chrome.storage.local.get("allowlist");
+    const next = isAllowlisted ? allowlist.filter((h) => !(currentHost === h || currentHost.endsWith("." + h))) : [...new Set([...allowlist, currentHost])];
+    await chrome.storage.local.set({ allowlist: next });
+  }
   await render();
 });
 render();
