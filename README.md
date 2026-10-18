@@ -1,39 +1,37 @@
 # Rolex Key AdBlocker
 
-A Chrome Manifest V3 extension using `declarativeNetRequest` to block requests to a curated set of known advertising and analytics domains.
+A Chrome Manifest V3 extension that blocks requests to a curated set of advertising and tracking domains, hides selected common ad containers, and tries to skip video ads when a visible skip control is available.
 
 ## Features
-- Manifest V3 network request rules
-- Separate, maintainable ad and tracker JSON rule lists
-- Popup protection toggle
-- Per-domain allowlist, including subdomains
-- Local settings stored with `chrome.storage`
-- No remote code and no external runtime dependencies
+- Network-level ad and tracker blocking using packaged Declarative Net Request rules
+- Expanded ad-domain list
+- Best-effort hiding of common ad slots on websites
+- YouTube skip-button automation, plus best-effort fast-forward/mute for some unskippable ads
+- Popup enable/pause control and per-domain allowlist
+- Local preferences; no remote code or runtime dependencies
 
 ## Install locally
 1. Download and extract this project.
 2. Open `chrome://extensions` in Chrome.
 3. Turn on **Developer mode**.
-4. Select **Load unpacked**.
-5. Choose the folder containing `manifest.json`.
+4. Select **Load unpacked** and choose the folder containing `manifest.json`.
+5. Reload the extension after updating files.
 
-## Maintain filter rules
-Edit `rules/ads.json` or `rules/trackers.json`. Each rule needs a unique integer ID within its own ruleset. After changes, open `chrome://extensions` and reload the extension. Keep rule conditions narrow and test sites that rely on third-party scripts.
-
-## Limitations
-This is a starter filter set, not a complete replacement for large community-maintained filter lists. Ads served from the same domain as page content, first-party sponsored content, and some video ads may not be blocked. The local counter is approximate and depends on Chrome's debugging event availability.
+## Important limitations
+No extension can guarantee removal of every ad on every site. Some ads are served from the same domain as page content, and websites frequently change their markup and video-ad behavior. YouTube's ad handling is particularly changeable; skip/fast-forward behavior is best-effort and may stop working after site updates. Hiding generic ad containers can occasionally hide legitimate page content. This extension does not remove sponsorships embedded directly into a video by its creator.
 
 ## Permissions
 - `storage`: persist preferences and allowlist
 - `declarativeNetRequest`: enforce packaged network rules
 - `declarativeNetRequestFeedback`: optional local rule-match debugging count
-- `<all_urls>`: allow rules and current-site allowlisting across websites
+- `<all_urls>`: apply filtering and ad-slot cleanup across websites
 
 ## Project layout
 ```text
 rolex-key-adblocker/
 ├── manifest.json
 ├── background.js
+├── content-ad-cleaner.js
 ├── popup.html
 ├── popup.css
 ├── popup.js
