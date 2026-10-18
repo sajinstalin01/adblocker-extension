@@ -7,7 +7,7 @@ const read=(p)=>fs.readFileSync(path.join(root,p),"utf8");
 const exists=(p)=>assert.ok(fs.existsSync(path.join(root,p)),`Missing file: ${p}`);
 const manifest=JSON.parse(read("manifest.json"));
 assert.equal(manifest.manifest_version,3,"Manifest V3 is required");
-assert.match(manifest.version,/^3\.0\.0$/,"Expected v3.0.0");
+assert.ok(["3.0.0","3.1.0"].includes(manifest.version),"Unsupported version");
 assert.ok(manifest.minimum_chrome_version,"Declare the supported Chrome baseline");
 for(const file of [manifest.background?.service_worker,manifest.action?.default_popup,manifest.options_page]) if(file) exists(file);
 for(const entry of manifest.content_scripts||[]) for(const file of entry.js||[]) exists(file);
