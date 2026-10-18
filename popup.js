@@ -2,8 +2,12 @@ const $ = (id) => document.getElementById(id);
 let currentHost = "", isAllowlisted = false;
 async function render() {
   const settings = await chrome.storage.local.get({
-    enabled: true, trackersEnabled: true, allowlist: [], blockedCount: 0, filterUpdate: {status:"not-run"}
+    enabled: true, trackersEnabled: true, allowlist: [], blockedCount: 0, theme: "system", filterUpdate: {status:"not-run"}
   });
+  const theme = settings.theme === "system"
+    ? (matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark")
+    : settings.theme;
+  document.documentElement.dataset.theme = theme;
   $("blocked").textContent = Number(settings.blockedCount || 0).toLocaleString();
   $("status").textContent = settings.enabled ? "Protection enabled" : "Protection paused";
   $("dot").classList.toggle("off", !settings.enabled);
