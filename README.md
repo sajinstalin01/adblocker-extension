@@ -1,45 +1,27 @@
 # Rolex Key AdBlocker
 
-Version 3.0.0 — Chrome Manifest V3 extension focused on reliability, recoverability, and local-first privacy.
+Version 3.1.0 — Chrome Manifest V3 extension with local-first settings.
 
 ## Features
-- Bundled network filtering for known ad, tracker, and pop-up-ad domains
-- Daily refresh of trusted JSON block rules with manual update
-- Validates remote rules before atomic replacement; retains last-known-good rules when downloads or validation fail
-- Namespaced dynamic rules so allowlist, custom domain, and remote filter updates do not erase one another
-- Pause/resume that disables bundled, remote, and custom blocking rules
-- Separate global tracker and pop-up ad-network controls
-- Permanent and temporary website allowlists; temporary entries expire automatically
-- Optional subscriptions to up to 10 HTTPS JSON filter lists (maximum 500 rules each, 5,000 combined)
-- Custom blocked domains and common ad-slot cleanup
-- Best-effort YouTube skip-button helper
-- Dark/light/system themes, import/export, local statistics, and restore-defaults recovery
-- Automated CI checks for JSON, rule IDs, resource references, JavaScript syntax, and UI element references
-- No remotely downloaded JavaScript
+- Bundled ad, tracker and pop-up network filtering; safe daily/manual JSON filter refresh
+- Permanent/temporary allowlists, custom blocked domains, import/export and local statistics
+- Balanced, Strict, Minimal and Custom protection profiles
+- Optional heuristic anti-adblock overlay detection
+- Reading mode with **Alt+Shift+R** shortcut
+- English and Malayalam labels for new settings and help
+- First-run setup wizard and update release notes
+- Local permission/security auditor
+- Popup compact/comfortable layout, accent colors and optional hidden statistics
+- Themes and automated GitHub Actions validation; no remotely downloaded JavaScript
 
-## Install locally
-1. Download or clone this repository.
-2. Open `chrome://extensions` in desktop Chrome.
-3. Turn on **Developer mode**.
-4. Choose **Load unpacked** and select the folder containing `manifest.json`.
-5. Reload the extension after updating files.
+## Install
+Open `chrome://extensions` in desktop Chrome, enable Developer mode, choose **Load unpacked**, and select the repository folder.
 
-## Filter update safety
-Remote lists must be HTTPS JSON arrays in Chrome Declarative Net Request block-rule format. Standard EasyList/Adblock Plus text lists are not parsed directly. All remote lists are validated before rules are replaced. Bundled rules remain active if an update fails. Only add community sources you trust.
+## Limitations
+Reading mode changes presentation only and may not fit every layout. Anti-adblock detection is heuristic and may miss sites or produce false positives; disable it if a site behaves incorrectly. Video ad skipping is best-effort. Detailed matched-rule counts may be unavailable in store installs.
 
-## Statistics
-Detailed `onRuleMatchedDebug` counts are available in unpacked/developer builds only. Counts are therefore not guaranteed to represent every blocked request in a normal Chrome Web Store install.
-
-## Video ads
-Skip automation depends on the current site UI and is best-effort. It cannot reliably remove every ad or sponsorship embedded directly into a creator's video.
-
-## Permissions
-- `storage`: preferences, rules, subscriptions, and local stats
-- `alarms`: daily filter refresh and temporary allowlist expiry
-- `declarativeNetRequest`: bundled and dynamic network rules
-- `declarativeNetRequestFeedback`: developer matched-rule statistics
-- `<all_urls>`: filtering and ad-slot cleanup across websites
-- `raw.githubusercontent.com`: fetch this project's JSON filter files
+## Filter safety and permissions
+Filter sources must be trusted HTTPS JSON arrays in Chrome Declarative Net Request format; standard EasyList text is not parsed. The auditor explains declared permissions. `<all_urls>` is broad and supports cross-site filtering and page enhancements; Chrome site-access controls may limit execution. Audit results remain local.
 
 ## License
 MIT — see `LICENSE`.
