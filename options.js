@@ -1,5 +1,5 @@
 const $ = (id) => document.getElementById(id);
-const DEFAULTS = {enabled:true, trackersEnabled:true, allowlist:[], customBlockDomains:[], theme:"system", blockedCount:0, statsBySite:{}, recentBlocks:[], filterUpdate:{status:"not-run",updatedAt:null,message:"Not checked yet"}};
+const DEFAULTS = {enabled:true, trackersEnabled:true, allowlist:[], customBlockDomains:[], communityFilterUrls:[], theme:"system", blockedCount:0, statsBySite:{}, recentBlocks:[], filterUpdate:{status:"not-run",updatedAt:null,message:"Not checked yet"}};
 function normalizeDomain(value) {
   let host = String(value || "").trim().toLowerCase().replace(/^https?:\/\//, "").split("/")[0].replace(/:\d+$/, "");
   return /^(?=.{1,253}$)([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)(\.([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?))*$/.test(host) ? host : null;
@@ -9,6 +9,19 @@ function setTheme(theme) {
   document.documentElement.dataset.theme = mode;
 }
 async function settings() { return {...DEFAULTS, ...(await chrome.storage.local.get(Object.keys(DEFAULTS)))}; }
+function renderUrlList(elementId, urls) {
+  const list=$(elementId); list.replaceChildren();
+  urls.forEach((url) => {
+    const li=document.createElement("li"), label=document.createElement("span"), remove=document.createElement("button");
+    label.textContent=url; remove.textContent="Remove"; remove.type="button"; remove.className="secondary";
+    remove.addEventListener("click", async () => {
+      const latest=await chrome.storage.local.get({communityFilterUrls:[]});
+      await chrome.storage.local.set({communityFilterUrls:latest.communityFilterUrls.filter((item)=>item!==url)});
+      $("message").textContent="Removed filter subscription."; await render();
+    });
+    li.append(label,remove); list.append(li);
+  });
+}
 function renderDomainList(elementId, hosts, storageKey) {
   const list = $(elementId); list.replaceChildren();
   [...hosts].sort().forEach((host) => {
@@ -27,6 +40,7 @@ async function render() {
   $("enabled").checked = s.enabled; $("trackersEnabled").checked = s.trackersEnabled; $("theme").value = s.theme;
   setTheme(s.theme);
   renderDomainList("allowList", s.allowlist || [], "allowlist");
+  renderUrlList("communityList", s.communityFilterUrls || []);
   renderDomainList("blockList", s.customBlockDomains || [], "customBlockDomains");
   $("totalBlocked").textContent = Number(s.blockedCount || 0).toLocaleString();
   $("trackedSites").textContent = Object.keys(s.statsBySite || {}).length.toLocaleString();
@@ -54,6 +68,20 @@ $("enabled").addEventListener("change", (e) => chrome.storage.local.set({enabled
 $("trackersEnabled").addEventListener("change", (e) => chrome.storage.local.set({trackersEnabled:e.target.checked}));
 $("theme").addEventListener("change", async (e) => { await chrome.storage.local.set({theme:e.target.value}); setTheme(e.target.value); });
 bindDomainForm("allowForm","allowHost","allowlist","Allowed ");
+$("communityForm").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  let url;
+  try { url = new URL($("communityUrl").value.trim()); } catch (_) { $("message").textContent="Enter a valid HTTPS JSON URL."; return; }
+  if (url.protocol !== "https:") { $("message").textContent="Filter subscriptions must use HTTPS."; return; }
+  const current=await chrome.storage.local.get({communityFilterUrls:[]});
+  if (current.communityFilterUrls.includes(url.href)) { $("message").textContent="That filter list is already subscribed."; return; }
+  if (current.communityFilterUrls.length >= 10) { $("message").textContent="Maximum of 10 community filter lists."; return; }
+  await chrome.storage.local.set({communityFilterUrls:[...current.communityFilterUrls,url.href]});
+  $("communityUrl").value=""; $("message").textContent="Added filter list. Updating and validating rules…";
+  try { const result=await chrome.runtime.sendMessage({type:"update-filters"}); $("message").textContent=result?.message || "Filter update completed."; }
+  catch (error) { $("message").textContent="Filter update failed: "+error.message; }
+  await render();
+});
 bindDomainForm("blockForm","blockHost","customBlockDomains","Blocking ");
 $("updateFilters").addEventListener("click", async () => {
   $("updateFilters").disabled = true; $("updateStatus").textContent = "Checking trusted filter source…";
@@ -69,7 +97,7 @@ $("clearStats").addEventListener("click", async () => {
 });
 $("exportData").addEventListener("click", async () => {
   const s = await settings();
-  const backup = {enabled:s.enabled,trackersEnabled:s.trackersEnabled,allowlist:s.allowlist,customBlockDomains:s.customBlockDomains,theme:s.theme,blockedCount:s.blockedCount,statsBySite:s.statsBySite,exportedAt:new Date().toISOString()};
+  const backup = {enabled:s.enabled,trackersEnabled:s.trackersEnabled,allowlist:s.allowlist,customBlockDomains:s.customBlockDomains,communityFilterUrls:s.communityFilterUrls,theme:s.theme,blockedCount:s.blockedCount,statsBySite:s.statsBySite,exportedAt:new Date().toISOString()};
   const blob = new Blob([JSON.stringify(backup,null,2)],{type:"application/json"});
   const url = URL.createObjectURL(blob), link=document.createElement("a");
   link.href=url; link.download="rolex-key-adblocker-settings.json"; link.click(); URL.revokeObjectURL(url);
@@ -88,6 +116,7 @@ $("importFile").addEventListener("change", async (event) => {
     for (const key of ["allowlist","customBlockDomains"]) {
       if (Array.isArray(data[key])) patch[key]=[...new Set(data[key].map(normalizeDomain).filter(Boolean))].slice(0,500);
     }
+    if (Array.isArray(data.communityFilterUrls)) patch.communityFilterUrls=[...new Set(data.communityFilterUrls.filter((url)=>typeof url==="string"&&url.startsWith("https://")))].slice(0,10);
     if (Number.isFinite(data.blockedCount) && data.blockedCount>=0) patch.blockedCount=Math.floor(data.blockedCount);
     if (data.statsBySite && typeof data.statsBySite==="object" && !Array.isArray(data.statsBySite)) {
       patch.statsBySite=Object.fromEntries(Object.entries(data.statsBySite).filter(([k,v])=>typeof k==="string"&&Number.isFinite(v)&&v>=0).slice(0,500));
