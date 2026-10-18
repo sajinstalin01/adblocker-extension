@@ -1,5 +1,5 @@
 const $ = (id) => document.getElementById(id);
-const DEFAULTS = {enabled:true, trackersEnabled:true, allowlist:[], customBlockDomains:[], communityFilterUrls:[], theme:"system", blockedCount:0, statsBySite:{}, recentBlocks:[], filterUpdate:{status:"not-run",updatedAt:null,message:"Not checked yet"}};
+const DEFAULTS = {enabled:true, trackersEnabled:true, privacyEnabled:true, allowlist:[], temporaryAllowlist:{}, customBlockDomains:[], communityFilterUrls:[], theme:"system", blockedCount:0, statsBySite:{}, recentBlocks:[], filterUpdate:{status:"not-run",updatedAt:null,message:"Not checked yet"}};
 function normalizeDomain(value) {
   let host = String(value || "").trim().toLowerCase().replace(/^https?:\/\//, "").split("/")[0].replace(/:\d+$/, "");
   return /^(?=.{1,253}$)([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)(\.([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?))*$/.test(host) ? host : null;
@@ -22,6 +22,20 @@ function renderUrlList(elementId, urls) {
     li.append(label,remove); list.append(li);
   });
 }
+function renderTemporaryAllowlist(entries) {
+  const list=$("tempAllowList"); list.replaceChildren();
+  Object.entries(entries).filter(([host,expiresAt])=>normalizeDomain(host)&&Number.isFinite(expiresAt)&&expiresAt>Date.now()).sort((a,b)=>a[1]-b[1]).forEach(([host,expiresAt])=>{
+    const li=document.createElement("li"), label=document.createElement("span"), remove=document.createElement("button");
+    label.textContent=host+" · expires "+new Date(expiresAt).toLocaleString();
+    remove.textContent="Remove"; remove.type="button"; remove.className="secondary";
+    remove.addEventListener("click",async()=>{
+      const latest=await chrome.storage.local.get({temporaryAllowlist:{}});
+      const next={...latest.temporaryAllowlist}; delete next[host];
+      await chrome.storage.local.set({temporaryAllowlist:next}); await render();
+    });
+    li.append(label,remove); list.append(li);
+  });
+}
 function renderDomainList(elementId, hosts, storageKey) {
   const list = $(elementId); list.replaceChildren();
   [...hosts].sort().forEach((host) => {
@@ -37,9 +51,10 @@ function renderDomainList(elementId, hosts, storageKey) {
 }
 async function render() {
   const s = await settings();
-  $("enabled").checked = s.enabled; $("trackersEnabled").checked = s.trackersEnabled; $("theme").value = s.theme;
+  $("enabled").checked = s.enabled; $("trackersEnabled").checked = s.trackersEnabled; $("privacyEnabled").checked = s.privacyEnabled; $("theme").value = s.theme;
   setTheme(s.theme);
   renderDomainList("allowList", s.allowlist || [], "allowlist");
+  renderTemporaryAllowlist(s.temporaryAllowlist || {});
   renderUrlList("communityList", s.communityFilterUrls || []);
   renderDomainList("blockList", s.customBlockDomains || [], "customBlockDomains");
   $("totalBlocked").textContent = Number(s.blockedCount || 0).toLocaleString();
@@ -66,8 +81,20 @@ function bindDomainForm(formId, inputId, key, message) {
 }
 $("enabled").addEventListener("change", (e) => chrome.storage.local.set({enabled:e.target.checked}));
 $("trackersEnabled").addEventListener("change", (e) => chrome.storage.local.set({trackersEnabled:e.target.checked}));
+$("privacyEnabled").addEventListener("change", (e) => chrome.storage.local.set({privacyEnabled:e.target.checked}));
 $("theme").addEventListener("change", async (e) => { await chrome.storage.local.set({theme:e.target.value}); setTheme(e.target.value); });
 bindDomainForm("allowForm","allowHost","allowlist","Allowed ");
+$("tempAllowForm").addEventListener("submit",async(event)=>{
+  event.preventDefault();
+  const host=normalizeDomain($("tempAllowHost").value);
+  if(!host){$("message").textContent="Enter a valid hostname, such as example.com.";return;}
+  const minutes=Number($("tempAllowDuration").value);
+  if(![15,60,1440].includes(minutes)){$("message").textContent="Choose a supported expiry.";return;}
+  const latest=await chrome.storage.local.get({temporaryAllowlist:{}});
+  latest.temporaryAllowlist[host]=Date.now()+minutes*60*1000;
+  await chrome.storage.local.set({temporaryAllowlist:latest.temporaryAllowlist});
+  $("tempAllowHost").value=""; $("message").textContent="Temporary allowlist added for "+host; await render();
+});
 $("communityForm").addEventListener("submit", async (event) => {
   event.preventDefault();
   let url;
@@ -97,11 +124,16 @@ $("clearStats").addEventListener("click", async () => {
 });
 $("exportData").addEventListener("click", async () => {
   const s = await settings();
-  const backup = {enabled:s.enabled,trackersEnabled:s.trackersEnabled,allowlist:s.allowlist,customBlockDomains:s.customBlockDomains,communityFilterUrls:s.communityFilterUrls,theme:s.theme,blockedCount:s.blockedCount,statsBySite:s.statsBySite,exportedAt:new Date().toISOString()};
+  const backup = {enabled:s.enabled,trackersEnabled:s.trackersEnabled,privacyEnabled:s.privacyEnabled,allowlist:s.allowlist,temporaryAllowlist:s.temporaryAllowlist,customBlockDomains:s.customBlockDomains,communityFilterUrls:s.communityFilterUrls,theme:s.theme,blockedCount:s.blockedCount,statsBySite:s.statsBySite,exportedAt:new Date().toISOString()};
   const blob = new Blob([JSON.stringify(backup,null,2)],{type:"application/json"});
   const url = URL.createObjectURL(blob), link=document.createElement("a");
   link.href=url; link.download="rolex-key-adblocker-settings.json"; link.click(); URL.revokeObjectURL(url);
   $("message").textContent = "Settings exported.";
+});
+$("restoreDefaults").addEventListener("click",async()=>{
+  if(!confirm("Restore default settings and clear site lists, subscriptions, and local statistics?")) return;
+  await chrome.storage.local.set({...DEFAULTS,filterUpdate:{status:"not-run",updatedAt:null,message:"Reset to defaults"}});
+  $("message").textContent="Default settings restored."; await render();
 });
 $("importButton").addEventListener("click", () => $("importFile").click());
 $("importFile").addEventListener("change", async (event) => {
@@ -112,11 +144,15 @@ $("importFile").addEventListener("change", async (event) => {
     const patch={};
     if (typeof data.enabled==="boolean") patch.enabled=data.enabled;
     if (typeof data.trackersEnabled==="boolean") patch.trackersEnabled=data.trackersEnabled;
+    if (typeof data.privacyEnabled==="boolean") patch.privacyEnabled=data.privacyEnabled;
     if (["system","dark","light"].includes(data.theme)) patch.theme=data.theme;
     for (const key of ["allowlist","customBlockDomains"]) {
       if (Array.isArray(data[key])) patch[key]=[...new Set(data[key].map(normalizeDomain).filter(Boolean))].slice(0,500);
     }
-    if (Array.isArray(data.communityFilterUrls)) patch.communityFilterUrls=[...new Set(data.communityFilterUrls.filter((url)=>typeof url==="string"&&url.startsWith("https://")))].slice(0,10);
+    if (Array.isArray(data.communityFilterUrls)) patch.communityFilterUrls=[...new Set(data.communityFilterUrls.filter((url)=>{try{return typeof url==="string"&&new URL(url).protocol==="https:";}catch(_){return false;}}))].slice(0,10);
+    if (data.temporaryAllowlist && typeof data.temporaryAllowlist==="object" && !Array.isArray(data.temporaryAllowlist)) {
+      patch.temporaryAllowlist=Object.fromEntries(Object.entries(data.temporaryAllowlist).map(([host,expiresAt])=>[normalizeDomain(host),expiresAt]).filter(([host,expiresAt])=>host&&Number.isFinite(expiresAt)&&expiresAt>Date.now()).slice(0,500));
+    }
     if (Number.isFinite(data.blockedCount) && data.blockedCount>=0) patch.blockedCount=Math.floor(data.blockedCount);
     if (data.statsBySite && typeof data.statsBySite==="object" && !Array.isArray(data.statsBySite)) {
       patch.statsBySite=Object.fromEntries(Object.entries(data.statsBySite).filter(([k,v])=>typeof k==="string"&&Number.isFinite(v)&&v>=0).slice(0,500));
