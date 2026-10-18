@@ -1,5 +1,5 @@
 const $ = (id) => document.getElementById(id);
-const DEFAULTS = {enabled:true, trackersEnabled:true, privacyEnabled:true, allowlist:[], temporaryAllowlist:{}, customBlockDomains:[], communityFilterUrls:[], theme:"system", blockedCount:0, statsBySite:{}, recentBlocks:[], filterUpdate:{status:"not-run",updatedAt:null,message:"Not checked yet"}};
+const DEFAULTS = {enabled:true, trackersEnabled:true, privacyEnabled:true, antiAdblockEnabled:false, readingModeEnabled:false, protectionProfile:"balanced", locale:"en", popupLayout:"comfortable", popupAccent:"mint", hidePopupStats:false, releaseNotesPending:false, allowlist:[], temporaryAllowlist:{}, customBlockDomains:[], communityFilterUrls:[], theme:"system", blockedCount:0, statsBySite:{}, recentBlocks:[], filterUpdate:{status:"not-run",updatedAt:null,message:"Not checked yet"}};
 function normalizeDomain(value) {
   let host = String(value || "").trim().toLowerCase().replace(/^https?:\/\//, "").split("/")[0].replace(/:\d+$/, "");
   return /^(?=.{1,253}$)([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)(\.([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?))*$/.test(host) ? host : null;
@@ -124,7 +124,7 @@ $("clearStats").addEventListener("click", async () => {
 });
 $("exportData").addEventListener("click", async () => {
   const s = await settings();
-  const backup = {enabled:s.enabled,trackersEnabled:s.trackersEnabled,privacyEnabled:s.privacyEnabled,allowlist:s.allowlist,temporaryAllowlist:s.temporaryAllowlist,customBlockDomains:s.customBlockDomains,communityFilterUrls:s.communityFilterUrls,theme:s.theme,blockedCount:s.blockedCount,statsBySite:s.statsBySite,exportedAt:new Date().toISOString()};
+  const backup = {enabled:s.enabled,trackersEnabled:s.trackersEnabled,privacyEnabled:s.privacyEnabled,antiAdblockEnabled:s.antiAdblockEnabled,readingModeEnabled:s.readingModeEnabled,protectionProfile:s.protectionProfile,locale:s.locale,popupLayout:s.popupLayout,popupAccent:s.popupAccent,hidePopupStats:s.hidePopupStats,allowlist:s.allowlist,temporaryAllowlist:s.temporaryAllowlist,customBlockDomains:s.customBlockDomains,communityFilterUrls:s.communityFilterUrls,theme:s.theme,blockedCount:s.blockedCount,statsBySite:s.statsBySite,exportedAt:new Date().toISOString()};
   const blob = new Blob([JSON.stringify(backup,null,2)],{type:"application/json"});
   const url = URL.createObjectURL(blob), link=document.createElement("a");
   link.href=url; link.download="rolex-key-adblocker-settings.json"; link.click(); URL.revokeObjectURL(url);
@@ -145,6 +145,11 @@ $("importFile").addEventListener("change", async (event) => {
     if (typeof data.enabled==="boolean") patch.enabled=data.enabled;
     if (typeof data.trackersEnabled==="boolean") patch.trackersEnabled=data.trackersEnabled;
     if (typeof data.privacyEnabled==="boolean") patch.privacyEnabled=data.privacyEnabled;
+    for(const key of ["antiAdblockEnabled","readingModeEnabled","hidePopupStats"])if(typeof data[key]==="boolean")patch[key]=data[key];
+    if(["balanced","strict","minimal","custom"].includes(data.protectionProfile))patch.protectionProfile=data.protectionProfile;
+    if(["en","ml"].includes(data.locale))patch.locale=data.locale;
+    if(["comfortable","compact"].includes(data.popupLayout))patch.popupLayout=data.popupLayout;
+    if(["mint","blue","violet","amber"].includes(data.popupAccent))patch.popupAccent=data.popupAccent;
     if (["system","dark","light"].includes(data.theme)) patch.theme=data.theme;
     for (const key of ["allowlist","customBlockDomains"]) {
       if (Array.isArray(data[key])) patch[key]=[...new Set(data[key].map(normalizeDomain).filter(Boolean))].slice(0,500);
