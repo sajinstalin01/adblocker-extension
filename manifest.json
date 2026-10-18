@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Rolex Key AdBlocker",
-  "version": "3.0.0",
-  "description": "Reliable ad and tracker blocking with validated filter updates, site controls, privacy settings, and video-ad skip assistance.",
+  "version": "3.1.0",
+  "description": "Ad blocking with accessibility tools, protection profiles, security review and safer updates.",
   "permissions": [
     "storage",
     "alarms",
@@ -27,7 +27,8 @@
         "https://*/*"
       ],
       "js": [
-        "content-ad-cleaner.js"
+        "content-ad-cleaner.js",
+        "content-features.js"
       ],
       "run_at": "document_idle"
     }
@@ -52,5 +53,13 @@
     ]
   },
   "options_page": "options.html",
-  "minimum_chrome_version": "121"
+  "minimum_chrome_version": "121",
+  "commands": {
+    "toggle-reading-mode": {
+      "suggested_key": {
+        "default": "Alt+Shift+R"
+      },
+      "description": "Toggle reading mode on the current website"
+    }
+  }
 }
