@@ -1,29 +1,101 @@
-const $ = id => document.getElementById(id);
-async function render() {
-  const { enabled = true, allowlist = [] } = await chrome.storage.local.get({ enabled: true, allowlist: [] });
-  $("enabled").checked = enabled;
-  $("list").replaceChildren();
-  [...allowlist].sort().forEach(host => {
+const $ = (id) => document.getElementById(id);
+const DEFAULTS = {enabled:true, trackersEnabled:true, allowlist:[], customBlockDomains:[], theme:"system", blockedCount:0, statsBySite:{}, recentBlocks:[], filterUpdate:{status:"not-run",updatedAt:null,message:"Not checked yet"}};
+function normalizeDomain(value) {
+  let host = String(value || "").trim().toLowerCase().replace(/^https?:\/\//, "").split("/")[0].replace(/:\d+$/, "");
+  return /^(?=.{1,253}$)([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)(\.([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?))*$/.test(host) ? host : null;
+}
+function setTheme(theme) {
+  const mode = theme === "system" ? (matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark") : theme;
+  document.documentElement.dataset.theme = mode;
+}
+async function settings() { return {...DEFAULTS, ...(await chrome.storage.local.get(Object.keys(DEFAULTS)))}; }
+function renderDomainList(elementId, hosts, storageKey) {
+  const list = $(elementId); list.replaceChildren();
+  [...hosts].sort().forEach((host) => {
     const li = document.createElement("li"), label = document.createElement("span"), remove = document.createElement("button");
-    label.textContent = host; remove.textContent = "Remove"; remove.type = "button";
+    label.textContent = host; remove.textContent = "Remove"; remove.type = "button"; remove.className = "secondary";
     remove.addEventListener("click", async () => {
-      const { allowlist: latest = [] } = await chrome.storage.local.get("allowlist");
-      await chrome.storage.local.set({ allowlist: latest.filter(item => item !== host) });
+      const latest = await chrome.storage.local.get({[storageKey]:[]});
+      await chrome.storage.local.set({[storageKey]: latest[storageKey].filter((item) => item !== host)});
       $("message").textContent = "Removed " + host; await render();
     });
-    li.append(label, remove); $("list").append(li);
+    li.append(label, remove); list.append(li);
   });
 }
-$("enabled").addEventListener("change", e => chrome.storage.local.set({ enabled: e.target.checked }));
-$("addForm").addEventListener("submit", async e => {
-  e.preventDefault();
-  const raw = $("host").value.trim().toLowerCase().replace(/^https?:\/\//, "").replace(/\/.*$/, "").replace(/:\d+$/, "");
-  if (!raw || raw.includes(" ") || raw.startsWith(".") || raw.endsWith(".") || !/^(?=.{1,253}$)([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)(\.([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?))*$/.test(raw)) {
-    $("message").textContent = "Enter a valid domain name, e.g. example.com."; return;
-  }
-  const { allowlist = [] } = await chrome.storage.local.get("allowlist");
-  if (allowlist.includes(raw)) { $("message").textContent = "That domain is already allowlisted."; return; }
-  await chrome.storage.local.set({ allowlist: [...allowlist, raw] });
-  $("host").value = ""; $("message").textContent = "Added " + raw; await render();
+async function render() {
+  const s = await settings();
+  $("enabled").checked = s.enabled; $("trackersEnabled").checked = s.trackersEnabled; $("theme").value = s.theme;
+  setTheme(s.theme);
+  renderDomainList("allowList", s.allowlist || [], "allowlist");
+  renderDomainList("blockList", s.customBlockDomains || [], "customBlockDomains");
+  $("totalBlocked").textContent = Number(s.blockedCount || 0).toLocaleString();
+  $("trackedSites").textContent = Object.keys(s.statsBySite || {}).length.toLocaleString();
+  const stats = $("siteStats"); stats.replaceChildren();
+  Object.entries(s.statsBySite || {}).sort((a,b) => b[1]-a[1]).slice(0,10).forEach(([host,count]) => {
+    const li=document.createElement("li"), name=document.createElement("span"), value=document.createElement("strong");
+    name.textContent=host; value.textContent=Number(count).toLocaleString(); li.append(name,value); stats.append(li);
+  });
+  const update = s.filterUpdate || DEFAULTS.filterUpdate;
+  $("updateStatus").textContent = update.message || update.status;
+  $("lastUpdated").textContent = update.updatedAt ? "Last successful update: " + new Date(update.updatedAt).toLocaleString() : "No successful remote update recorded yet.";
+}
+function bindDomainForm(formId, inputId, key, message) {
+  $(formId).addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const host = normalizeDomain($(inputId).value);
+    if (!host) { $("message").textContent = "Enter a valid hostname, such as example.com."; return; }
+    const current = await chrome.storage.local.get({[key]:[]});
+    if (current[key].includes(host)) { $("message").textContent = "That domain is already in the list."; return; }
+    await chrome.storage.local.set({[key]:[...current[key],host]});
+    $(inputId).value = ""; $("message").textContent = message + host; await render();
+  });
+}
+$("enabled").addEventListener("change", (e) => chrome.storage.local.set({enabled:e.target.checked}));
+$("trackersEnabled").addEventListener("change", (e) => chrome.storage.local.set({trackersEnabled:e.target.checked}));
+$("theme").addEventListener("change", async (e) => { await chrome.storage.local.set({theme:e.target.value}); setTheme(e.target.value); });
+bindDomainForm("allowForm","allowHost","allowlist","Allowed ");
+bindDomainForm("blockForm","blockHost","customBlockDomains","Blocking ");
+$("updateFilters").addEventListener("click", async () => {
+  $("updateFilters").disabled = true; $("updateStatus").textContent = "Checking trusted filter source…";
+  try {
+    const result = await chrome.runtime.sendMessage({type:"update-filters"});
+    $("updateStatus").textContent = result?.message || "Update request finished.";
+  } catch (error) { $("updateStatus").textContent = "Update failed: " + error.message; }
+  $("updateFilters").disabled = false; await render();
 });
+$("clearStats").addEventListener("click", async () => {
+  await chrome.storage.local.set({blockedCount:0,statsBySite:{},recentBlocks:[]});
+  $("message").textContent = "Local statistics cleared."; await render();
+});
+$("exportData").addEventListener("click", async () => {
+  const s = await settings();
+  const backup = {enabled:s.enabled,trackersEnabled:s.trackersEnabled,allowlist:s.allowlist,customBlockDomains:s.customBlockDomains,theme:s.theme,blockedCount:s.blockedCount,statsBySite:s.statsBySite,exportedAt:new Date().toISOString()};
+  const blob = new Blob([JSON.stringify(backup,null,2)],{type:"application/json"});
+  const url = URL.createObjectURL(blob), link=document.createElement("a");
+  link.href=url; link.download="rolex-key-adblocker-settings.json"; link.click(); URL.revokeObjectURL(url);
+  $("message").textContent = "Settings exported.";
+});
+$("importButton").addEventListener("click", () => $("importFile").click());
+$("importFile").addEventListener("change", async (event) => {
+  const file=event.target.files?.[0]; if (!file) return;
+  try {
+    if (file.size > 1024*1024) throw new Error("File is larger than 1 MB.");
+    const data=JSON.parse(await file.text());
+    const patch={};
+    if (typeof data.enabled==="boolean") patch.enabled=data.enabled;
+    if (typeof data.trackersEnabled==="boolean") patch.trackersEnabled=data.trackersEnabled;
+    if (["system","dark","light"].includes(data.theme)) patch.theme=data.theme;
+    for (const key of ["allowlist","customBlockDomains"]) {
+      if (Array.isArray(data[key])) patch[key]=[...new Set(data[key].map(normalizeDomain).filter(Boolean))].slice(0,500);
+    }
+    if (Number.isFinite(data.blockedCount) && data.blockedCount>=0) patch.blockedCount=Math.floor(data.blockedCount);
+    if (data.statsBySite && typeof data.statsBySite==="object" && !Array.isArray(data.statsBySite)) {
+      patch.statsBySite=Object.fromEntries(Object.entries(data.statsBySite).filter(([k,v])=>typeof k==="string"&&Number.isFinite(v)&&v>=0).slice(0,500));
+    }
+    await chrome.storage.local.set(patch);
+    $("message").textContent = "Settings imported. Filter lists are not imported from backup.";
+  } catch (error) { $("message").textContent = "Import failed: " + error.message; }
+  event.target.value=""; await render();
+});
+chrome.storage.onChanged.addListener(() => { void render(); });
 render();
