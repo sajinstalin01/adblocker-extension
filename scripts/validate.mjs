@@ -5,12 +5,14 @@ import vm from "node:vm";
 const read=p=>fs.readFileSync(path.resolve(p),"utf8"),exists=p=>assert.ok(fs.existsSync(p),`Missing resource: ${p}`);
 const m=JSON.parse(read("manifest.json"));
 assert.equal(m.manifest_version,3,"Manifest V3 is required");
-assert.equal(m.version,"3.1.0","Expected v3.1.0");
+assert.ok(["3.1.0","3.2.0"].includes(m.version),"Unsupported version");
 assert.ok(m.commands?.["toggle-reading-mode"],"Reading mode shortcut missing");
 for(const f of [m.background?.service_worker,m.action?.default_popup,m.options_page,...(m.content_scripts||[]).flatMap(x=>x.js||[])])if(f)exists(f);
 const types=new Set(["main_frame","sub_frame","stylesheet","script","image","font","object","xmlhttprequest","ping","csp_report","media","websocket","webtransport","webbundle","other"]),rsids=new Set();
 for(const rs of m.declarative_net_request.rule_resources){assert.ok(!rsids.has(rs.id),`Duplicate ruleset ${rs.id}`);rsids.add(rs.id);exists(rs.path);const rules=JSON.parse(read(rs.path)),ids=new Set();assert.ok(Array.isArray(rules));for(const r of rules){assert.ok(Number.isInteger(r.id)&&r.id>0&&!ids.has(r.id),`Invalid/duplicate ID in ${rs.path}`);ids.add(r.id);assert.equal(r.action?.type,"block");assert.ok(typeof r.condition?.urlFilter==="string"&&r.condition.urlFilter);assert.ok(Array.isArray(r.condition.resourceTypes)&&r.condition.resourceTypes.length);for(const t of r.condition.resourceTypes)assert.ok(types.has(t),`Unsupported resource type ${t}`);}}
-for(const f of ["background.js","popup.js","options.js","content-ad-cleaner.js","content-features.js","i18n.js","features-ui.js","welcome.js","security.js"])new vm.Script(read(f),{filename:f});
+for(const f of ["background.js","popup.js","options.js","content-ad-cleaner.js","content-features.js","content-streaming-cleaner.js","i18n.js","features-ui.js","welcome.js","security.js"])new vm.Script(read(f),{filename:f});
 for(const [html,js] of [["popup.html","popup.js"],["options.html","options.js"],["options.html","features-ui.js"],["welcome.html","welcome.js"],["security.html","security.js"]]){const s=read(html),src=read(js),ids=[...s.matchAll(/\bid="([^"]+)"/g)].map(x=>x[1]);assert.equal(ids.length,new Set(ids).size,`Duplicate DOM IDs in ${html}`);const missing=[...new Set([...src.matchAll(/\$\("([^"]+)"\)/g)].map(x=>x[1]).filter(x=>!ids.includes(x)))];assert.deepEqual(missing,[],`Unresolved IDs in ${js}`);for(const [,r] of s.matchAll(/(?:src|href)="([^"]+)"/g))if(!/^(https?:|#|mailto:)/.test(r))exists(r);}
-for(const f of ["welcome.html","security.html","i18n.js","features-ui.js","content-features.js","popup.css","options.css"])exists(f);
+assert.ok(read("content-streaming-cleaner.js").includes("jiohotstar.com"),"JioHotstar support missing");assert.ok(read("content-streaming-cleaner.js").includes("primevideo.com"),"Prime Video support missing");assert.ok(read("content-streaming-cleaner.js").includes("sonyliv.com")&&read("content-streaming-cleaner.js").includes("zee5.com"),"Major streaming support missing");assert.ok(read("options.html").includes('id="streamingCleanupEnabled"'),"Streaming cleanup setting missing");
+if(m.version==="3.2.0")assert.ok((m.content_scripts||[]).some(x=>(x.js||[]).includes("content-streaming-cleaner.js")),"Manifest does not load streaming cleaner");
+for(const f of ["welcome.html","security.html","content-streaming-cleaner.js","i18n.js","features-ui.js","content-features.js","popup.css","options.css"])exists(f);
 console.log("All Rolex Key AdBlocker v3.1.0 validation checks passed.");
