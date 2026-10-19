@@ -1,6 +1,6 @@
 # Rolex Key AdBlocker
 
-Version 3.4.0 — Chrome Manifest V3 extension with local-first settings.
+Version 3.5.0 — Chromium Manifest V3 extension with local-first settings and a multi-browser installation hub.
 
 ## Features
 - Bundled ad, tracker and pop-up network filtering; safe daily/manual JSON filter refresh
@@ -24,8 +24,11 @@ The extension checks `update-feed.json` on GitHub every six hours and when the b
 
 Chrome Web Store installations receive extension code updates through Chrome's built-in update system after a new version is published to the store. Unpacked/developer installs cannot safely self-replace extension code; users must download the updated repository/release and reload the unpacked extension manually. The feed must be updated as part of each release.
 
+## Multi-browser installation hub
+Open [`browsers.html`](browsers.html) for the browser compatibility chart, browser icons, official store-search links, and installation guidance for Chrome, Firefox, Safari, Microsoft Edge, Brave, and Opera Mini. Store-search links do not imply that this project is already published in those stores. At present, the tested codebase is Chromium-focused; Firefox needs a compatible build and testing, Safari requires packaging/signing and App Store distribution, and Opera Mini does not support normal browser extensions.
+
 ## Install
-Open `chrome://extensions` in desktop Chrome, enable Developer mode, choose **Load unpacked**, and select the repository folder.
+For desktop Chrome, Microsoft Edge, or Brave, download the [repository ZIP](https://github.com/sajinstalin01/adblocker-extension/archive/refs/heads/main.zip), extract it, open the browser's extensions page, enable Developer mode (where available), and choose **Load unpacked** / **Load unpacked extension**. The browser compatibility page explains the limitations. Do not install this Chromium package in Firefox or Safari and assume compatibility.
 
 ## Optional local sign-in
 The optional sign-in is device-local and only gates the settings page UI. It does not create a cloud account, sync credentials, or protect against someone with access to the browser profile or extension files. Ad blocking works with sign-in disabled. Use a unique password.
