@@ -1,9 +1,11 @@
 # Rolex Key AdBlocker
 
-Version 3.3.0 — Chrome Manifest V3 extension with local-first settings.
+Version 3.4.0 — Chrome Manifest V3 extension with local-first settings.
 
 ## Features
 - Bundled ad, tracker and pop-up network filtering; safe daily/manual JSON filter refresh
+- Automatic GitHub release-feed checks every 6 hours, update badge/status and optional desktop notifications
+- Popup and Settings update notice with link to official GitHub releases
 - Permanent/temporary allowlists, custom blocked domains, import/export and local statistics
 - Balanced, Strict, Minimal and Custom protection profiles
 - Optional heuristic anti-adblock overlay detection
@@ -16,6 +18,11 @@ Version 3.3.0 — Chrome Manifest V3 extension with local-first settings.
 - Local permission/security auditor
 - Popup compact/comfortable layout, accent colors and optional hidden statistics
 - Themes and automated GitHub Actions validation; no remotely downloaded JavaScript
+
+## Extension updates
+The extension checks `update-feed.json` on GitHub every six hours and when the browser starts/extension is installed. Users can enable desktop notifications in Settings. Only version/release metadata is fetched; remote JavaScript is never downloaded or executed. When a newer release is available, the extension shows an update badge and link to the official GitHub Releases page.
+
+Chrome Web Store installations receive extension code updates through Chrome's built-in update system after a new version is published to the store. Unpacked/developer installs cannot safely self-replace extension code; users must download the updated repository/release and reload the unpacked extension manually. The feed must be updated as part of each release.
 
 ## Install
 Open `chrome://extensions` in desktop Chrome, enable Developer mode, choose **Load unpacked**, and select the repository folder.
