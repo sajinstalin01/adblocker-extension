@@ -2,7 +2,7 @@ const $ = (id) => document.getElementById(id);
 let currentHost = "", isAllowlisted = false, temporaryAllowHost = "";
 async function render() {
   const settings = await chrome.storage.local.get({
-    enabled: true, trackersEnabled: true, allowlist: [], temporaryAllowlist: {}, blockedCount: 0, theme: "system", filterUpdate: {status:"not-run"}, popupLayout:"comfortable", popupAccent:"mint", hidePopupStats:false, locale:"en"
+    enabled: true, trackersEnabled: true, allowlist: [], temporaryAllowlist: {}, blockedCount: 0, theme: "system", filterUpdate: {status:"not-run"}, popupLayout:"comfortable", popupAccent:"mint", hidePopupStats:false, locale:"en", extensionUpdate:{status:"not-checked"}
   });
   const theme = settings.theme === "system"
     ? (matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark")
@@ -16,6 +16,11 @@ async function render() {
   $("toggle").setAttribute("aria-label", settings.enabled ? "Pause protection" : "Enable protection");
   $("trackerState").textContent = settings.trackersEnabled ? "On" : "Off";
   $("updateState").textContent = settings.filterUpdate?.status === "success" ? "Updated" : settings.filterUpdate?.status === "error" ? "Retry needed" : "Bundled";
+  const extensionUpdate = settings.extensionUpdate || {};
+  $("extensionUpdateNotice").hidden = extensionUpdate.status !== "available";
+  $("extensionUpdateTitle").textContent = extensionUpdate.title || "Extension update available";
+  $("extensionUpdateVersion").textContent = extensionUpdate.latestVersion ? "Version " + extensionUpdate.latestVersion : "Available";
+  $("extensionUpdateLink").href = extensionUpdate.releaseUrl || "https://github.com/sajinstalin01/adblocker-extension/releases";
   try {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     const url = new URL(tab.url);
