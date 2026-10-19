@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Rolex Key AdBlocker",
-  "version": "3.1.0",
-  "description": "Ad blocking with accessibility tools, protection profiles, security review and safer updates.",
+  "version": "3.2.0",
+  "description": "Cross-site ad blocking with streaming-site cleanup, accessibility tools and local-first controls.",
   "permissions": [
     "storage",
     "alarms",
@@ -28,7 +28,8 @@
       ],
       "js": [
         "content-ad-cleaner.js",
-        "content-features.js"
+        "content-features.js",
+        "content-streaming-cleaner.js"
       ],
       "run_at": "document_idle"
     }
