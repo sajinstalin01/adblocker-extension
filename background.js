@@ -185,13 +185,13 @@ async function checkExtensionUpdates() {
     return failed;
   }
 }
-chrome.notifications?.onClicked.addListener(async notificationId => {
+chrome.notifications?.onClicked?.addListener(async notificationId => {
   if (!notificationId.startsWith("rolex-update-")) return;
   const { extensionUpdate = {} } = await chrome.storage.local.get({ extensionUpdate: {} });
   await chrome.tabs.create({ url: extensionUpdate.releaseUrl || "https://github.com/sajinstalin01/adblocker-extension/releases" });
   chrome.notifications.clear(notificationId);
 });
-chrome.notifications?.onButtonClicked.addListener(async (notificationId, buttonIndex) => {
+chrome.notifications?.onButtonClicked?.addListener(async (notificationId, buttonIndex) => {
   if (!notificationId.startsWith("rolex-update-") || buttonIndex !== 0) return;
   const { extensionUpdate = {} } = await chrome.storage.local.get({ extensionUpdate: {} });
   await chrome.tabs.create({ url: extensionUpdate.releaseUrl || "https://github.com/sajinstalin01/adblocker-extension/releases" });
