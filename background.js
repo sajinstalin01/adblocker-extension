@@ -11,7 +11,8 @@ const DEFAULTS = {
   blockedCount: 0,
   statsBySite: {},
   recentBlocks: [],
-  filterUpdate: { status: "not-run", updatedAt: null, message: "Not checked yet" }
+  filterUpdate: { status: "not-run", updatedAt: null, message: "Not checked yet" },
+  extensionUpdate: { status: "not-checked" }
 };
 
 const RULE_RANGES = {
@@ -23,6 +24,8 @@ const RULE_RANGES = {
 };
 const UPDATE_ALARM = "rolex-filter-refresh";
 const TEMP_ALLOWLIST_ALARM = "rolex-temp-allowlist-expiry";
+const EXTENSION_UPDATE_ALARM = "rolex-extension-update-check";
+const EXTENSION_UPDATE_FEED = "https://raw.githubusercontent.com/sajinstalin01/adblocker-extension/main/update-feed.json";
 let statsQueue = Promise.resolve();
 
 chrome.runtime.onInstalled.addListener(async (details) => {
@@ -32,8 +35,10 @@ chrome.runtime.onInstalled.addListener(async (details) => {
   await applyEnabledState();
   await ensureUpdateAlarm();
   await ensureTemporaryAllowlistAlarm();
+  await ensureExtensionUpdateAlarm();
   if(details.reason==="install"){await chrome.storage.local.set({onboardingComplete:false});await chrome.tabs.create({url:chrome.runtime.getURL("welcome.html")});}else if(details.reason==="update"&&details.previousVersion!==currentVersion){await chrome.storage.local.set({releaseNotesPending:true});}
   await updateRemoteFilters();
+  await checkExtensionUpdates();
 });
 
 chrome.commands.onCommand.addListener(async command=>{if(command!=="toggle-reading-mode")return;const [tab]=await chrome.tabs.query({active:true,currentWindow:true});if(tab?.id)chrome.tabs.sendMessage(tab.id,{type:"toggle-reading-mode"}).catch(()=>{});});
@@ -42,10 +47,13 @@ chrome.runtime.onStartup.addListener(async () => {
   await applyEnabledState();
   await ensureUpdateAlarm();
   await ensureTemporaryAllowlistAlarm();
+  await ensureExtensionUpdateAlarm();
+  void checkExtensionUpdates();
 });
 
 chrome.alarms.onAlarm.addListener((alarm) => {
   if (alarm.name === UPDATE_ALARM) void updateRemoteFilters();
+  if (alarm.name === EXTENSION_UPDATE_ALARM) void checkExtensionUpdates();
   if (alarm.name === TEMP_ALLOWLIST_ALARM) void expireTemporaryAllowlist();
 });
 
@@ -138,6 +146,58 @@ async function refreshCustomDomainRules() {
 async function ensureUpdateAlarm() {
   await chrome.alarms.create(UPDATE_ALARM, { periodInMinutes: 1440, delayInMinutes: 5 });
 }
+
+async function ensureExtensionUpdateAlarm() {
+  await chrome.alarms.create(EXTENSION_UPDATE_ALARM, { periodInMinutes: 360, delayInMinutes: 3 });
+}
+function compareVersions(a, b) {
+  const parse = value => String(value || "").split(".").map(part => Number.parseInt(part, 10));
+  const left = parse(a), right = parse(b);
+  if (left.length !== 3 || right.length !== 3 || [...left, ...right].some(n => !Number.isInteger(n) || n < 0)) return 0;
+  for (let i = 0; i < 3; i++) if (left[i] !== right[i]) return left[i] > right[i] ? 1 : -1;
+  return 0;
+}
+async function checkExtensionUpdates() {
+  const installedVersion = chrome.runtime.getManifest().version;
+  try {
+    const response = await fetch(EXTENSION_UPDATE_FEED, { cache: "no-store" });
+    if (!response.ok) throw new Error("Update feed unavailable (" + response.status + ").");
+    const feed = await response.json();
+    if (!feed || typeof feed.latestVersion !== "string" || !/^\\d+\\.\\d+\\.\\d+$/.test(feed.latestVersion) || typeof feed.title !== "string" || typeof feed.message !== "string") throw new Error("Invalid update feed.");
+    const releaseUrl = typeof feed.releaseUrl === "string" && feed.releaseUrl.startsWith("https://github.com/sajinstalin01/adblocker-extension/") ? feed.releaseUrl : "https://github.com/sajinstalin01/adblocker-extension/releases";
+    const newer = compareVersions(feed.latestVersion, installedVersion) > 0;
+    const update = { status: newer ? "available" : "current", installedVersion, latestVersion: feed.latestVersion, title: feed.title.slice(0, 120), message: feed.message.slice(0, 300), releaseUrl, features: Array.isArray(feed.features) ? feed.features.filter(x => typeof x === "string").slice(0, 8) : [], checkedAt: new Date().toISOString() };
+    await chrome.storage.local.set({ extensionUpdate: update });
+    await chrome.action.setBadgeText({ text: newer ? "UPD" : "" });
+    if (newer) {
+      const { lastNotifiedUpdateVersion = "" } = await chrome.storage.local.get({ lastNotifiedUpdateVersion: "" });
+      const hasPermission = await chrome.permissions.contains({ permissions: ["notifications"] });
+      if (hasPermission && lastNotifiedUpdateVersion !== feed.latestVersion) {
+        await chrome.notifications.create("rolex-update-" + feed.latestVersion, { type: "basic", iconUrl: chrome.runtime.getURL("notification-icon.png"), title: "Rolex Key AdBlocker update available", message: (feed.title + ": " + feed.message).slice(0, 240), priority: 1, buttons: [{ title: "View update" }] });
+        await chrome.storage.local.set({ lastNotifiedUpdateVersion: feed.latestVersion });
+      }
+    }
+    return update;
+  } catch (error) {
+    const prior = await chrome.storage.local.get({ extensionUpdate: { status: "not-checked" } });
+    const failed = { ...prior.extensionUpdate, status: prior.extensionUpdate?.status === "available" ? "available" : "error", checkError: String(error?.message || "Update check failed").slice(0, 180), checkedAt: new Date().toISOString() };
+    await chrome.storage.local.set({ extensionUpdate: failed });
+    return failed;
+  }
+}
+chrome.notifications?.onClicked.addListener(async notificationId => {
+  if (!notificationId.startsWith("rolex-update-")) return;
+  const { extensionUpdate = {} } = await chrome.storage.local.get({ extensionUpdate: {} });
+  await chrome.tabs.create({ url: extensionUpdate.releaseUrl || "https://github.com/sajinstalin01/adblocker-extension/releases" });
+  chrome.notifications.clear(notificationId);
+});
+chrome.notifications?.onButtonClicked.addListener(async (notificationId, buttonIndex) => {
+  if (!notificationId.startsWith("rolex-update-") || buttonIndex !== 0) return;
+  const { extensionUpdate = {} } = await chrome.storage.local.get({ extensionUpdate: {} });
+  await chrome.tabs.create({ url: extensionUpdate.releaseUrl || "https://github.com/sajinstalin01/adblocker-extension/releases" });
+  chrome.notifications.clear(notificationId);
+});
+
 async function ensureTemporaryAllowlistAlarm() {
   await chrome.alarms.create(TEMP_ALLOWLIST_ALARM, { periodInMinutes: 15, delayInMinutes: 15 });
 }
@@ -229,6 +289,10 @@ async function updateRemoteFilters() {
 }
 
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+  if (message?.type === "check-extension-updates") {
+    checkExtensionUpdates().then(sendResponse);
+    return true;
+  }
   if (message?.type === "update-filters") {
     updateRemoteFilters().then(async () => sendResponse((await getSettings()).filterUpdate));
     return true;
