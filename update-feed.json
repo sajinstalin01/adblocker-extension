@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "latestVersion": "3.4.0",
+  "title": "Automatic update checks and release notifications",
+  "message": "Version 3.4.0 adds periodic update checks, optional desktop notifications, and an update notice in the extension UI.",
+  "releaseUrl": "https://github.com/sajinstalin01/adblocker-extension/releases",
+  "publishedAt": "2026-10-19",
+  "features": [
+    "Checks the GitHub update feed every 6 hours",
+    "Optional desktop notifications when a newer version is available",
+    "Update badge and in-extension update status",
+    "Only validated metadata is fetched; no remote JavaScript is downloaded"
+  ]
+}
