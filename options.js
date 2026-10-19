@@ -1,5 +1,5 @@
 const $ = (id) => document.getElementById(id);
-const DEFAULTS = {enabled:true, trackersEnabled:true, privacyEnabled:true, antiAdblockEnabled:false, readingModeEnabled:false, protectionProfile:"balanced", locale:"en", popupLayout:"comfortable", popupAccent:"mint", hidePopupStats:false, releaseNotesPending:false, allowlist:[], temporaryAllowlist:{}, customBlockDomains:[], communityFilterUrls:[], theme:"system", blockedCount:0, statsBySite:{}, recentBlocks:[], filterUpdate:{status:"not-run",updatedAt:null,message:"Not checked yet"}};
+const DEFAULTS = {enabled:true, trackersEnabled:true, privacyEnabled:true, antiAdblockEnabled:false, readingModeEnabled:false, protectionProfile:"balanced", locale:"en", popupLayout:"comfortable", popupAccent:"mint", hidePopupStats:false, releaseNotesPending:false, allowlist:[], temporaryAllowlist:{}, customBlockDomains:[], communityFilterUrls:[], theme:"system", blockedCount:0, statsBySite:{}, recentBlocks:[], filterUpdate:{status:"not-run",updatedAt:null,message:"Not checked yet"}, extensionUpdate:{status:"not-checked"}};
 function normalizeDomain(value) {
   let host = String(value || "").trim().toLowerCase().replace(/^https?:\/\//, "").split("/")[0].replace(/:\d+$/, "");
   return /^(?=.{1,253}$)([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)(\.([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?))*$/.test(host) ? host : null;
@@ -64,6 +64,9 @@ async function render() {
     const li=document.createElement("li"), name=document.createElement("span"), value=document.createElement("strong");
     name.textContent=host; value.textContent=Number(count).toLocaleString(); li.append(name,value); stats.append(li);
   });
+  const extensionUpdate = s.extensionUpdate || {status:"not-checked"};
+  $("extensionUpdateStatus").textContent = extensionUpdate.status === "available" ? "Version " + extensionUpdate.latestVersion + " is available (installed: " + extensionUpdate.installedVersion + ")." : extensionUpdate.status === "current" ? "You are using the latest version (" + extensionUpdate.installedVersion + ")." : extensionUpdate.checkError || "Update status has not been checked yet.";
+  $("extensionUpdateDetails").textContent = extensionUpdate.checkedAt ? "Last checked: " + new Date(extensionUpdate.checkedAt).toLocaleString() + (extensionUpdate.features?.length ? " · " + extensionUpdate.features.join(" · ") : "") : "";
   const update = s.filterUpdate || DEFAULTS.filterUpdate;
   $("updateStatus").textContent = update.message || update.status;
   $("lastUpdated").textContent = update.updatedAt ? "Last successful update: " + new Date(update.updatedAt).toLocaleString() : "No successful remote update recorded yet.";
@@ -110,6 +113,20 @@ $("communityForm").addEventListener("submit", async (event) => {
   await render();
 });
 bindDomainForm("blockForm","blockHost","customBlockDomains","Blocking ");
+$("checkExtensionUpdates").addEventListener("click", async () => {
+  $("checkExtensionUpdates").disabled = true; $("extensionUpdateStatus").textContent = "Checking GitHub for a newer release…";
+  try { const result = await chrome.runtime.sendMessage({type:"check-extension-updates"}); await render(); if (result?.status === "available") $("extensionUpdateStatus").textContent = "Version " + result.latestVersion + " is available. Open the official release page to update."; }
+  catch (error) { $("extensionUpdateStatus").textContent = "Update check failed: " + error.message; }
+  $("checkExtensionUpdates").disabled = false;
+});
+$("enableUpdateNotifications").addEventListener("click", async () => {
+  try { const granted = await chrome.permissions.request({permissions:["notifications"]});
+    if (!granted) { $("extensionUpdateStatus").textContent = "Desktop notifications were not enabled. Update status will still appear here and on the extension badge."; return; }
+    $("extensionUpdateStatus").textContent = "Desktop notifications enabled for future updates.";
+    const result = await chrome.runtime.sendMessage({type:"check-extension-updates"});
+    if (result?.status === "available") $("extensionUpdateStatus").textContent = "Version " + result.latestVersion + " is available. Desktop notifications enabled.";
+  } catch (error) { $("extensionUpdateStatus").textContent = "Could not enable notifications: " + error.message; }
+});
 $("updateFilters").addEventListener("click", async () => {
   $("updateFilters").disabled = true; $("updateStatus").textContent = "Checking trusted filter source…";
   try {
