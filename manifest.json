@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Rolex Key AdBlocker",
-  "version": "3.3.0",
-  "description": "Cross-site ad blocking with YouTube Shorts controls, streaming-site cleanup, accessibility tools and optional local settings lock.",
+  "version": "3.4.0",
+  "description": "Cross-site ad blocking with YouTube Shorts controls, streaming cleanup, automatic update checks and optional local settings lock.",
   "permissions": [
     "storage",
     "alarms",
@@ -63,5 +63,8 @@
       },
       "description": "Toggle reading mode on the current website"
     }
-  }
+  },
+  "optional_permissions": [
+    "notifications"
+  ]
 }
