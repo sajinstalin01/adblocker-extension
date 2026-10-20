@@ -12,7 +12,7 @@ function restore(){for(const el of document.querySelectorAll("["+MARK+"]")){cons
 async function run(){await readSettings();if(!enabled||allowed){restore();return;}safeSkip();hideClearlyMarkedPageAds();}
 function queue(){if(queued)return;queued=true;requestAnimationFrame(()=>{queued=false;void run();});}
 chrome.storage.onChanged.addListener(queue);
-if(document.documentElement)new MutationObserver(queue).observe(document.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:["aria-label","title","class"]});
+new MutationObserver(queue).observe(document,{childList:true,subtree:true,attributes:true,attributeFilter:["aria-label","title","class"]});
 window.addEventListener("yt-navigate-finish",queue);window.addEventListener("popstate",queue);
 void run();
 })();
