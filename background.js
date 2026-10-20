@@ -215,7 +215,7 @@ async function expireTemporaryAllowlist() {
 
 function validateRemoteRules(data, baseId, maxRules = 2000) {
   if (!Array.isArray(data) || data.length > maxRules) throw new Error("Filter file exceeds its permitted rule limit.");
-  const resourceTypes = new Set(["main_frame", "sub_frame", "stylesheet", "script", "image", "font", "object", "xmlhttprequest", "ping", "media", "websocket", "other"]);
+  const resourceTypes = new Set(["main_frame", "sub_frame", "stylesheet", "script", "image", "font", "object", "xmlhttprequest", "ping", "csp_report", "media", "websocket", "webtransport", "webbundle", "other"]);
   return data.map((rule, index) => {
     const filter = typeof rule?.condition?.urlFilter === "string" ? rule.condition.urlFilter.trim() : "";
     if (!rule || rule.action?.type !== "block" || !filter || filter.length > 1500 || ["*", "||*^", "|http", "|https", "http", "https"].includes(filter.toLowerCase())) {
@@ -245,6 +245,8 @@ function validateRemoteRules(data, baseId, maxRules = 2000) {
 async function fetchJsonLimited(url, maxBytes = 2 * 1024 * 1024) {
   const response = await fetch(url, { cache: "no-store", redirect: "error" });
   if (!response.ok) throw new Error("Filter source returned HTTP " + response.status + ".");
+  const declaredLength = Number(response.headers.get("content-length") || 0);
+  if (declaredLength > maxBytes) throw new Error("Filter source exceeds the permitted download size.");
   const body = await response.text();
   if (body.length > maxBytes) throw new Error("Filter source exceeds the permitted download size.");
   try { return JSON.parse(body); } catch (_) { throw new Error("Filter source is not valid JSON."); }
