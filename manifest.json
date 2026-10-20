@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Rolex Key AdBlocker",
-  "version": "3.5.0",
-  "description": "Cross-site ad blocking with YouTube Shorts controls, streaming cleanup, automatic update checks, browser compatibility guidance and optional local settings lock.",
+  "version": "3.6.0",
+  "description": "Cross-site ad and tracker blocking, cryptomining script protection, custom icons, advanced settings and secure filter validation.",
   "permissions": [
     "storage",
     "alarms",
@@ -15,7 +15,13 @@
   ],
   "action": {
     "default_title": "Rolex Key AdBlocker",
-    "default_popup": "popup.html"
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "notification-icon.png",
+      "32": "notification-icon.png",
+      "48": "notification-icon.png",
+      "128": "notification-icon.png"
+    }
   },
   "background": {
     "service_worker": "background.js"
@@ -51,6 +57,11 @@
         "id": "base_privacy",
         "enabled": true,
         "path": "rules/privacy.json"
+      },
+      {
+        "id": "base_mining",
+        "enabled": false,
+        "path": "rules/miners.json"
       }
     ]
   },
@@ -66,5 +77,11 @@
   },
   "optional_permissions": [
     "notifications"
-  ]
+  ],
+  "icons": {
+    "16": "notification-icon.png",
+    "32": "notification-icon.png",
+    "48": "notification-icon.png",
+    "128": "notification-icon.png"
+  }
 }
