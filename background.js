@@ -174,7 +174,7 @@ async function checkExtensionUpdates() {
       const { lastNotifiedUpdateVersion = "" } = await chrome.storage.local.get({ lastNotifiedUpdateVersion: "" });
       const hasPermission = await chrome.permissions.contains({ permissions: ["notifications"] });
       if (hasPermission && lastNotifiedUpdateVersion !== feed.latestVersion) {
-        await chrome.notifications.create("rolex-update-" + feed.latestVersion, { type: "basic", iconUrl: chrome.runtime.getURL("notification-icon.png"), title: "Rolex Key AdBlocker update available", message: (feed.title + ": " + feed.message).slice(0, 240), priority: 1, buttons: [{ title: "View update" }] });
+        await chrome.notifications.create("rolex-update-" + feed.latestVersion, { type: "basic", iconUrl: chrome.runtime.getURL("icons/icon128.png"), title: "Rolex Key AdBlocker update available", message: (feed.title + ": " + feed.message).slice(0, 240), priority: 1, buttons: [{ title: "View update" }] });
         await chrome.storage.local.set({ lastNotifiedUpdateVersion: feed.latestVersion });
       }
     }
