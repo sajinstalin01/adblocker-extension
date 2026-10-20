@@ -1,15 +1,15 @@
 {
   "schemaVersion": 1,
-  "latestVersion": "3.6.0",
-  "title": "Custom icon, stronger filter security and miner blocking",
-  "message": "Version 3.6.0 wires the branded icon into the extension, adds an optional known cryptomining-script blocklist, and hardens remote filter validation and download handling.",
+  "latestVersion": "3.7.0",
+  "title": "Real-time ad cleanup and safer streaming controls",
+  "message": "Version 3.7.0 adds an early-running live ad cleanup helper, watches dynamic page changes, and clicks clearly labelled skip-ad controls where available. In-stream/server-inserted ads remain platform-dependent.",
   "releaseUrl": "https://github.com/sajinstalin01/adblocker-extension/releases",
   "publishedAt": "2026-10-20",
   "features": [
-    "Branded extension icon for toolbar, popup and settings",
-    "Optional known cryptomining-script blocklist with its own setting",
-    "Reject overly broad or malformed remote filter rules",
-    "Limit filter download sizes and reject HTTP redirects",
-    "Protection profiles include miner blocking"
+    "Early document-start ad cleanup helper on supported video platforms",
+    "MutationObserver-based response to dynamically inserted ad elements",
+    "Clicks explicit Skip Ad controls where available",
+    "Preserves video players and avoids DRM/player manipulation",
+    "Existing network-level Declarative Net Request filtering remains active"
   ]
 }
