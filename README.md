@@ -17,7 +17,10 @@ Version 3.6.0 — Chromium Manifest V3 extension with a branded toolbar icon, ha
 - First-run setup wizard and update release notes
 - Local permission/security auditor
 - Popup compact/comfortable layout, accent colors and optional hidden statistics
-- Branded toolbar/popup/settings icon, protection profile controls, and automated GitHub Actions validation; no remotely downloaded JavaScript
+- Custom crowned-shield vector icon with generated 16/32/48/128 px PNG sizes, protection profile controls, and automated GitHub Actions validation; no remotely downloaded JavaScript
+
+## Custom extension icon
+The vector source lives at `icons/rolex-key-adblocker.svg`. GitHub Actions generates 16, 32, 48, and 128 px PNG icons using `scripts/generate_icons.py`. The manifest uses PNG assets for the browser toolbar and extension listing.
 
 ## Extension updates
 The extension checks `update-feed.json` on GitHub every six hours and when the browser starts/extension is installed. Users can enable desktop notifications in Settings. Only version/release metadata is fetched; remote JavaScript is never downloaded or executed. When a newer release is available, the extension shows an update badge and link to the official GitHub Releases page.
