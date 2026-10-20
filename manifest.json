@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Rolex Key AdBlocker",
-  "version": "3.6.0",
-  "description": "Cross-site ad and tracker blocking, cryptomining script protection, custom icons, advanced settings and secure filter validation.",
+  "version": "3.7.0",
+  "description": "Real-time network ad filtering and early streaming-page ad cleanup with safe skip controls.",
   "permissions": [
     "storage",
     "alarms",
@@ -27,6 +27,16 @@
     "service_worker": "background.js"
   },
   "content_scripts": [
+    {
+      "matches": [
+        "http://*/*",
+        "https://*/*"
+      ],
+      "js": [
+        "content-live-ad-blocker.js"
+      ],
+      "run_at": "document_start"
+    },
     {
       "matches": [
         "http://*/*",
