@@ -1,15 +1,15 @@
 {
   "schemaVersion": 1,
-  "latestVersion": "3.5.0",
-  "title": "Multi-browser installation hub",
-  "message": "Version 3.5.0 adds a browser compatibility and installation page with browser icons, official store-search links, and honest support status for Chrome, Firefox, Safari, Edge, Brave, and Opera Mini.",
+  "latestVersion": "3.6.0",
+  "title": "Custom icon, stronger filter security and miner blocking",
+  "message": "Version 3.6.0 wires the branded icon into the extension, adds an optional known cryptomining-script blocklist, and hardens remote filter validation and download handling.",
   "releaseUrl": "https://github.com/sajinstalin01/adblocker-extension/releases",
   "publishedAt": "2026-10-20",
   "features": [
-    "Browser compatibility chart with browser icons",
-    "Official browser store-search and installation guidance links",
-    "Chromium manual-install guidance for Chrome, Edge, and Brave",
-    "Clear status notes for Firefox, Safari, and unsupported Opera Mini",
-    "No remote code loading; browser support status is documented transparently"
+    "Branded extension icon for toolbar, popup and settings",
+    "Optional known cryptomining-script blocklist with its own setting",
+    "Reject overly broad or malformed remote filter rules",
+    "Limit filter download sizes and reject HTTP redirects",
+    "Protection profiles include miner blocking"
   ]
 }
