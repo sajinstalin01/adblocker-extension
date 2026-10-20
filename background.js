@@ -217,21 +217,26 @@ function validateRemoteRules(data, baseId, maxRules = 2000) {
   if (!Array.isArray(data) || data.length > maxRules) throw new Error("Filter file exceeds its permitted rule limit.");
   const resourceTypes = new Set(["main_frame", "sub_frame", "stylesheet", "script", "image", "font", "object", "xmlhttprequest", "ping", "media", "websocket", "other"]);
   return data.map((rule, index) => {
-    if (!rule || rule.action?.type !== "block" || typeof rule.condition?.urlFilter !== "string" || !rule.condition.urlFilter.trim()) {
-      throw new Error("Unsupported rule format at entry " + (index + 1) + ".");
+    const filter = typeof rule?.condition?.urlFilter === "string" ? rule.condition.urlFilter.trim() : "";
+    if (!rule || rule.action?.type !== "block" || !filter || filter.length > 1500 || ["*", "||*^", "|http", "|https", "http", "https"].includes(filter.toLowerCase())) {
+      throw new Error("Unsupported or overly broad rule format at entry " + (index + 1) + ".");
     }
+    if (rule.condition.regexFilter !== undefined) throw new Error("Regular-expression filters are not accepted.");
     const types = Array.isArray(rule.condition.resourceTypes)
       ? rule.condition.resourceTypes.filter((type) => resourceTypes.has(type))
       : ["script", "image", "xmlhttprequest", "sub_frame", "other"];
-    if (!types.length) throw new Error("Rule " + (index + 1) + " has no supported resource types.");
+    if (!types.length || (Array.isArray(rule.condition.resourceTypes) && types.length !== rule.condition.resourceTypes.length)) throw new Error("Rule " + (index + 1) + " has unsupported resource types.");
+    if (rule.condition.requestDomains !== undefined && (!Array.isArray(rule.condition.requestDomains) || !rule.condition.requestDomains.length || rule.condition.requestDomains.length > 50 || rule.condition.requestDomains.some(domain => !normalizeDomain(domain)))) {
+      throw new Error("Rule " + (index + 1) + " has invalid request domains.");
+    }
     return {
       id: baseId + index,
       priority: 1,
       action: { type: "block" },
       condition: {
-        urlFilter: rule.condition.urlFilter.slice(0, 1500),
+        urlFilter: filter,
         resourceTypes: types,
-        ...(Array.isArray(rule.condition.requestDomains) ? { requestDomains: rule.condition.requestDomains.map(normalizeDomain).filter(Boolean).slice(0, 50) } : {})
+        ...(Array.isArray(rule.condition.requestDomains) ? { requestDomains: rule.condition.requestDomains.map(normalizeDomain).slice(0, 50) } : {})
       }
     };
   });
