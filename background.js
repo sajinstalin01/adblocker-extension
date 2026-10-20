@@ -2,6 +2,7 @@ const DEFAULTS = {
   enabled: true,
   trackersEnabled: true,
   privacyEnabled: true,
+  minersEnabled: true,
   antiAdblockEnabled:false, readingModeEnabled:false, protectionProfile:"balanced", locale:"en", popupLayout:"comfortable", popupAccent:"mint", hidePopupStats:false, onboardingComplete:false, releaseNotesPending:false, lastSeenVersion:"3.0.0",
   allowlist: [],
   temporaryAllowlist: {},
@@ -64,9 +65,9 @@ async function getSettings() {
 async function applyEnabledState() {
   const settings = await getSettings();
   const enabledIds = settings.enabled
-    ? ["base_ads", ...(settings.trackersEnabled ? ["base_trackers"] : []), ...(settings.privacyEnabled ? ["base_privacy"] : [])]
+    ? ["base_ads", ...(settings.trackersEnabled ? ["base_trackers"] : []), ...(settings.privacyEnabled ? ["base_privacy"] : []), ...(settings.minersEnabled ? ["base_mining"] : [])]
     : [];
-  const allIds = ["base_ads", "base_trackers", "base_privacy"];
+  const allIds = ["base_ads", "base_trackers", "base_privacy", "base_mining"];
   await chrome.declarativeNetRequest.updateEnabledRulesets({
     enableRulesetIds: enabledIds,
     disableRulesetIds: allIds.filter((id) => !enabledIds.includes(id))
@@ -305,7 +306,7 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
 
 chrome.storage.onChanged.addListener((changes, area) => {
   if (area !== "local") return;
-  if (changes.enabled || changes.trackersEnabled || changes.privacyEnabled) void applyEnabledState();
+  if (changes.enabled || changes.trackersEnabled || changes.privacyEnabled || changes.minersEnabled) void applyEnabledState();
   if (changes.allowlist || changes.temporaryAllowlist) void refreshAllowlistRules();
   if (changes.customBlockDomains) void refreshCustomDomainRules();
   if (changes.communityFilterUrls) void updateRemoteFilters();
