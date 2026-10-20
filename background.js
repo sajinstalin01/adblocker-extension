@@ -242,19 +242,25 @@ function validateRemoteRules(data, baseId, maxRules = 2000) {
   });
 }
 
+async function fetchJsonLimited(url, maxBytes = 2 * 1024 * 1024) {
+  const response = await fetch(url, { cache: "no-store", redirect: "error" });
+  if (!response.ok) throw new Error("Filter source returned HTTP " + response.status + ".");
+  const body = await response.text();
+  if (body.length > maxBytes) throw new Error("Filter source exceeds the permitted download size.");
+  try { return JSON.parse(body); } catch (_) { throw new Error("Filter source is not valid JSON."); }
+}
+
 async function updateRemoteFilters() {
   const previous = await getSettings();
   try {
     const root = "https://raw.githubusercontent.com/sajinstalin01/adblocker-extension/main/rules/";
     const current = await getSettings();
     const communityUrls = [...new Set((current.communityFilterUrls || []).filter((url) => typeof url === "string" && url.startsWith("https://")))].slice(0, 10);
-    const responses = await Promise.all([
-      fetch(root + "ads.json", { cache: "no-store" }),
-      fetch(root + "trackers.json", { cache: "no-store" }),
-      ...communityUrls.map((url) => fetch(url, { cache: "no-store" }))
+    const parsed = await Promise.all([
+      fetchJsonLimited(root + "ads.json"),
+      fetchJsonLimited(root + "trackers.json"),
+      ...communityUrls.map((url) => fetchJsonLimited(url, 1024 * 1024))
     ]);
-    if (responses.some((response) => !response.ok)) throw new Error("Could not download one or more filter files. Previous rules were retained.");
-    const parsed = await Promise.all(responses.map((response) => response.json()));
     const ads = validateRemoteRules(parsed[0], RULE_RANGES.remoteAds.start);
     const trackers = validateRemoteRules(parsed[1], RULE_RANGES.remoteTrackers.start);
     const community = [];
