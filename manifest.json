@@ -17,10 +17,10 @@
     "default_title": "Rolex Key AdBlocker",
     "default_popup": "popup.html",
     "default_icon": {
-      "16": "notification-icon.png",
-      "32": "notification-icon.png",
-      "48": "notification-icon.png",
-      "128": "notification-icon.png"
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
     }
   },
   "background": {
@@ -79,9 +79,9 @@
     "notifications"
   ],
   "icons": {
-    "16": "notification-icon.png",
-    "32": "notification-icon.png",
-    "48": "notification-icon.png",
-    "128": "notification-icon.png"
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
   }
 }
