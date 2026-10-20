@@ -10,7 +10,6 @@
       "resourceTypes": [
         "script",
         "xmlhttprequest",
-        "worker",
         "other"
       ]
     }
@@ -26,7 +25,6 @@
       "resourceTypes": [
         "script",
         "xmlhttprequest",
-        "worker",
         "other"
       ]
     }
@@ -42,7 +40,6 @@
       "resourceTypes": [
         "script",
         "xmlhttprequest",
-        "worker",
         "other"
       ]
     }
@@ -58,7 +55,6 @@
       "resourceTypes": [
         "script",
         "xmlhttprequest",
-        "worker",
         "other"
       ]
     }
@@ -74,7 +70,6 @@
       "resourceTypes": [
         "script",
         "xmlhttprequest",
-        "worker",
         "other"
       ]
     }
@@ -90,7 +85,6 @@
       "resourceTypes": [
         "script",
         "xmlhttprequest",
-        "worker",
         "other"
       ]
     }
@@ -106,7 +100,6 @@
       "resourceTypes": [
         "script",
         "xmlhttprequest",
-        "worker",
         "other"
       ]
     }
@@ -122,7 +115,6 @@
       "resourceTypes": [
         "script",
         "xmlhttprequest",
-        "worker",
         "other"
       ]
     }
@@ -138,7 +130,6 @@
       "resourceTypes": [
         "script",
         "xmlhttprequest",
-        "worker",
         "other"
       ]
     }
@@ -154,7 +145,6 @@
       "resourceTypes": [
         "script",
         "xmlhttprequest",
-        "worker",
         "other"
       ]
     }
