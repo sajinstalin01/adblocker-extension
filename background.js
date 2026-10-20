@@ -164,7 +164,7 @@ async function checkExtensionUpdates() {
     const response = await fetch(EXTENSION_UPDATE_FEED, { cache: "no-store" });
     if (!response.ok) throw new Error("Update feed unavailable (" + response.status + ").");
     const feed = await response.json();
-    if (!feed || typeof feed.latestVersion !== "string" || !/^\\d+\\.\\d+\\.\\d+$/.test(feed.latestVersion) || typeof feed.title !== "string" || typeof feed.message !== "string") throw new Error("Invalid update feed.");
+    if (!feed || typeof feed.latestVersion !== "string" || !/^\d+\.\d+\.\d+$/.test(feed.latestVersion) || typeof feed.title !== "string" || typeof feed.message !== "string") throw new Error("Invalid update feed.");
     const releaseUrl = typeof feed.releaseUrl === "string" && feed.releaseUrl.startsWith("https://github.com/sajinstalin01/adblocker-extension/") ? feed.releaseUrl : "https://github.com/sajinstalin01/adblocker-extension/releases";
     const newer = compareVersions(feed.latestVersion, installedVersion) > 0;
     const update = { status: newer ? "available" : "current", installedVersion, latestVersion: feed.latestVersion, title: feed.title.slice(0, 120), message: feed.message.slice(0, 300), releaseUrl, features: Array.isArray(feed.features) ? feed.features.filter(x => typeof x === "string").slice(0, 8) : [], checkedAt: new Date().toISOString() };
