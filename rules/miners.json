@@ -1,0 +1,162 @@
+[
+  {
+    "id": 401,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||coinhive.com^",
+      "resourceTypes": [
+        "script",
+        "xmlhttprequest",
+        "worker",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 402,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||coin-hive.com^",
+      "resourceTypes": [
+        "script",
+        "xmlhttprequest",
+        "worker",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 403,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||jsecoin.com^",
+      "resourceTypes": [
+        "script",
+        "xmlhttprequest",
+        "worker",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 404,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||webminepool.com^",
+      "resourceTypes": [
+        "script",
+        "xmlhttprequest",
+        "worker",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 405,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||cryptoloot.pro^",
+      "resourceTypes": [
+        "script",
+        "xmlhttprequest",
+        "worker",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 406,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||crypto-loot.com^",
+      "resourceTypes": [
+        "script",
+        "xmlhttprequest",
+        "worker",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 407,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||minero.cc^",
+      "resourceTypes": [
+        "script",
+        "xmlhttprequest",
+        "worker",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 408,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||browsermine.com^",
+      "resourceTypes": [
+        "script",
+        "xmlhttprequest",
+        "worker",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 409,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||coinimp.com^",
+      "resourceTypes": [
+        "script",
+        "xmlhttprequest",
+        "worker",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 410,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||webmine.cz^",
+      "resourceTypes": [
+        "script",
+        "xmlhttprequest",
+        "worker",
+        "other"
+      ]
+    }
+  }
+]
