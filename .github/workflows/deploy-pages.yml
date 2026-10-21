@@ -24,10 +24,14 @@ jobs:
       - uses: actions/checkout@v4
       - name: Configure Pages
         uses: actions/configure-pages@v5
+      - name: Prepare release center files
+        run: |
+          mkdir -p dist-pages
+          cp releases.html releases.js dist-pages/
       - name: Upload release center
         uses: actions/upload-pages-artifact@v3
         with:
-          path: .
+          path: dist-pages
       - name: Deploy release center
         id: deployment
         uses: actions/deploy-pages@v4
