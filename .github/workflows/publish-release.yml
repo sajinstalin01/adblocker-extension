@@ -39,11 +39,6 @@ jobs:
         run: |
           mkdir -p dist
           git archive --format=zip --prefix=rolex-key-adblocker/ "HEAD" -o "dist/rolex-key-adblocker-${{ steps.release.outputs.version }}.zip"
-      - name: Update release feed from changelog
-        env:
-          RELEASE_VERSION: ${{ steps.release.outputs.version }}
-          RELEASE_TAG: ${{ steps.release.outputs.tag }}
-        run: node scripts/update-release-feed.mjs
       - name: Commit refreshed feed to main
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
