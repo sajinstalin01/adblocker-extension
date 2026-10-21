@@ -24,10 +24,14 @@ Version 3.8.0 — Chromium Manifest V3 extension with expanded ad-network filter
 ## Custom extension icon
 The vector source lives at `icons/rolex-key-adblocker.svg`. GitHub Actions generates 16, 32, 48, and 128 px PNG icons using `scripts/generate_icons.py`. The manifest uses PNG assets for the browser toolbar and extension listing.
 
-## Extension updates
+## Releases and extension updates
+The official release center is [`releases.html`](releases.html), which displays the current update feed and fetches published release history from GitHub. The [GitHub Releases page](https://github.com/sajinstalin01/adblocker-extension/releases) is the canonical release/download page. `CHANGELOG.md` records version notes.
+
+For each release, update `manifest.json` to the new version and add a dated `## [x.y.z] - YYYY-MM-DD` section to `CHANGELOG.md`, then push a matching `vX.Y.Z` tag. The `Publish extension release` GitHub Actions workflow validates the tagged version, runs project validation, refreshes `update-feed.json`, and publishes a GitHub Release with a versioned ZIP. Ensure repository Actions permissions allow workflows to write contents/releases. You can also run the workflow manually with an existing version tag.
+
 The extension checks `update-feed.json` on GitHub every six hours and when the browser starts/extension is installed. Users can enable desktop notifications in Settings. Only version/release metadata is fetched; remote JavaScript is never downloaded or executed. When a newer release is available, the extension shows an update badge and link to the official GitHub Releases page.
 
-Chrome Web Store installations receive extension code updates through Chrome's built-in update system after a new version is published to the store. Unpacked/developer installs cannot safely self-replace extension code; users must download the updated repository/release and reload the unpacked extension manually. The feed must be updated as part of each release.
+Chrome Web Store installations receive extension code updates through Chrome's built-in update system after a new version is published to the store. Unpacked/developer installs cannot safely self-replace extension code; users must download the updated repository/release and reload the unpacked extension manually. The release workflow updates the feed from the matching changelog section. Unpacked/developer installs still require a manual download and reload; metadata checks do not install new extension code.
 
 ## Multi-browser installation hub
 Open [`browsers.html`](browsers.html) for the browser compatibility chart, browser icons, official store-search links, and installation guidance for Chrome, Firefox, Safari, Microsoft Edge, Brave, and Opera Mini. Store-search links do not imply that this project is already published in those stores. At present, the tested codebase is Chromium-focused; Firefox needs a compatible build and testing, Safari requires packaging/signing and App Store distribution, and Opera Mini does not support normal browser extensions.
