@@ -35,6 +35,10 @@ jobs:
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
       - name: Validate extension files
         run: node scripts/validate.mjs
+      - name: Build source archive from tagged commit
+        run: |
+          mkdir -p dist
+          git archive --format=zip --prefix=rolex-key-adblocker/ "HEAD" -o "dist/rolex-key-adblocker-${{ steps.release.outputs.version }}.zip"
       - name: Update release feed from changelog
         env:
           RELEASE_VERSION: ${{ steps.release.outputs.version }}
@@ -58,10 +62,6 @@ jobs:
             git commit -m "Update release feed for v$RELEASE_VERSION"
             git push origin main
           fi
-      - name: Build source archive
-        run: |
-          mkdir -p dist
-          git archive --format=zip --prefix=rolex-key-adblocker/ "HEAD" -o "dist/rolex-key-adblocker-${{ steps.release.outputs.version }}.zip"
       - name: Publish GitHub Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
