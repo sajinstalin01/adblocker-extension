@@ -5,7 +5,7 @@ import vm from "node:vm";
 const read=p=>fs.readFileSync(path.resolve(p),"utf8"),exists=p=>assert.ok(fs.existsSync(p),`Missing resource: ${p}`);
 const m=JSON.parse(read("manifest.json"));
 assert.equal(m.manifest_version,3,"Manifest V3 is required");
-assert.ok(["3.8.0"].includes(m.version),"Unsupported version");
+assert.ok(/^\d+\.\d+\.\d+$/.test(m.version),"Manifest version must be semantic x.y.z");
 assert.ok(m.commands?.["toggle-reading-mode"],"Reading mode shortcut missing");
 for(const f of [m.background?.service_worker,m.action?.default_popup,m.options_page,...(m.content_scripts||[]).flatMap(x=>x.js||[])])if(f)exists(f);
 const types=new Set(["main_frame","sub_frame","stylesheet","script","image","font","object","xmlhttprequest","ping","csp_report","media","websocket","webtransport","webbundle","other"]),rsids=new Set();
@@ -14,9 +14,9 @@ for(const f of ["background.js","popup.js","options.js","content-ad-cleaner.js",
 for(const [html,js] of [["popup.html","popup.js"],["options.html","options.js"],["options.html","features-ui.js"],["welcome.html","welcome.js"],["security.html","security.js"]]){const s=read(html),src=read(js),ids=[...s.matchAll(/\bid="([^"]+)"/g)].map(x=>x[1]);assert.equal(ids.length,new Set(ids).size,`Duplicate DOM IDs in ${html}`);const missing=[...new Set([...src.matchAll(/\$\("([^"]+)"\)/g)].map(x=>x[1]).filter(x=>!ids.includes(x)))];assert.deepEqual(missing,[],`Unresolved IDs in ${js}`);for(const [,r] of s.matchAll(/(?:src|href)="([^"]+)"/g))if(!/^(https?:|#|mailto:)/.test(r))exists(r);}
 assert.ok(read("content-streaming-cleaner.js").includes("jiohotstar.com"),"JioHotstar support missing");assert.ok(read("content-streaming-cleaner.js").includes("primevideo.com"),"Prime Video support missing");assert.ok(read("content-streaming-cleaner.js").includes("sonyliv.com")&&read("content-streaming-cleaner.js").includes("zee5.com"),"Major streaming support missing");assert.ok(read("options.html").includes('id="streamingCleanupEnabled"'),"Streaming cleanup setting missing");assert.ok(read("options.html").includes('id="youtubeShortsEnabled"'),"YouTube Shorts toggle missing");assert.ok(read("options.html").includes('id="localLoginPanel"'),"Optional local sign-in UI missing");assert.ok(read("content-youtube.js").includes("ytd-reel-shelf-renderer"),"YouTube Shorts selectors missing");assert.ok(read("content-youtube.js").includes("ytd-ad-slot-renderer"),"YouTube ad cleanup selectors missing");assert.ok(read("local-login.js").includes("PBKDF2"),"Local password hashing missing");
 if(m.version==="3.3.0")assert.ok((m.content_scripts||[]).some(x=>(x.js||[]).includes("content-streaming-cleaner.js")),"Manifest does not load streaming cleaner");
-for(const f of ["welcome.html","security.html","content-streaming-cleaner.js","content-live-ad-blocker.js","i18n.js","features-ui.js","content-features.js","popup.css","options.css","notification-icon.png","update-feed.json","browsers.html","browsers.css","icons/rolex-key-adblocker.svg","scripts/generate_icons.py",".github/workflows/generate-icons.yml"])exists(f);
+for(const f of ["welcome.html","security.html","content-streaming-cleaner.js","content-live-ad-blocker.js","i18n.js","features-ui.js","content-features.js","popup.css","options.css","notification-icon.png","update-feed.json","browsers.html","browsers.css","releases.html","releases.js","CHANGELOG.md","scripts/update-release-feed.mjs","scripts/release-notes.mjs",".github/workflows/publish-release.yml","icons/rolex-key-adblocker.svg","scripts/generate_icons.py",".github/workflows/generate-icons.yml"])exists(f);
 assert.ok(m.optional_permissions?.includes("notifications"),"Optional notifications permission missing");
-assert.ok(read("update-feed.json").includes('"latestVersion": "3.8.0"'),"Extension update feed missing");
+const feed=JSON.parse(read("update-feed.json"));assert.ok(/^\d+\.\d+\.\d+$/.test(feed.latestVersion),"Extension update feed version invalid");assert.ok(feed.releaseUrl?.startsWith("https://github.com/sajinstalin01/adblocker-extension/releases"),"Release URL missing");
 assert.ok(read("background.js").includes("checkExtensionUpdates"),"Extension update checker missing");
 assert.ok(read("options.html").includes('id="checkExtensionUpdates"')&&read("options.html").includes('id="enableUpdateNotifications"'),"Update controls missing");
 assert.ok(read("popup.html").includes('id="extensionUpdateNotice"'),"Popup update notice missing");
@@ -29,4 +29,4 @@ assert.ok(read("scripts/generate_icons.py").includes("cairosvg"),"Icon generator
 assert.ok(m.declarative_net_request.rule_resources.some(rs=>rs.id==="base_mining"&&rs.path==="rules/miners.json"),"Miner protection ruleset missing");
 assert.ok(read("options.html").includes('id="minersEnabled"'),"Miner blocking setting missing");
 assert.ok(read("background.js").includes("fetchJsonLimited"),"Secure filter download guard missing");
-console.log("All Rolex Key AdBlocker v3.8.0 validation checks passed.");
+console.log("All Rolex Key AdBlocker v"+m.version+" validation checks passed.");
