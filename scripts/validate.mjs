@@ -5,7 +5,7 @@ import vm from "node:vm";
 const read=p=>fs.readFileSync(path.resolve(p),"utf8"),exists=p=>assert.ok(fs.existsSync(p),`Missing resource: ${p}`);
 const m=JSON.parse(read("manifest.json"));
 assert.equal(m.manifest_version,3,"Manifest V3 is required");
-assert.ok(["3.7.0"].includes(m.version),"Unsupported version");
+assert.ok(["3.8.0"].includes(m.version),"Unsupported version");
 assert.ok(m.commands?.["toggle-reading-mode"],"Reading mode shortcut missing");
 for(const f of [m.background?.service_worker,m.action?.default_popup,m.options_page,...(m.content_scripts||[]).flatMap(x=>x.js||[])])if(f)exists(f);
 const types=new Set(["main_frame","sub_frame","stylesheet","script","image","font","object","xmlhttprequest","ping","csp_report","media","websocket","webtransport","webbundle","other"]),rsids=new Set();
@@ -16,7 +16,7 @@ assert.ok(read("content-streaming-cleaner.js").includes("jiohotstar.com"),"JioHo
 if(m.version==="3.3.0")assert.ok((m.content_scripts||[]).some(x=>(x.js||[]).includes("content-streaming-cleaner.js")),"Manifest does not load streaming cleaner");
 for(const f of ["welcome.html","security.html","content-streaming-cleaner.js","content-live-ad-blocker.js","i18n.js","features-ui.js","content-features.js","popup.css","options.css","notification-icon.png","update-feed.json","browsers.html","browsers.css","icons/rolex-key-adblocker.svg","scripts/generate_icons.py",".github/workflows/generate-icons.yml"])exists(f);
 assert.ok(m.optional_permissions?.includes("notifications"),"Optional notifications permission missing");
-assert.ok(read("update-feed.json").includes('"latestVersion": "3.7.0"'),"Extension update feed missing");
+assert.ok(read("update-feed.json").includes('"latestVersion": "3.8.0"'),"Extension update feed missing");
 assert.ok(read("background.js").includes("checkExtensionUpdates"),"Extension update checker missing");
 assert.ok(read("options.html").includes('id="checkExtensionUpdates"')&&read("options.html").includes('id="enableUpdateNotifications"'),"Update controls missing");
 assert.ok(read("popup.html").includes('id="extensionUpdateNotice"'),"Popup update notice missing");
@@ -29,4 +29,4 @@ assert.ok(read("scripts/generate_icons.py").includes("cairosvg"),"Icon generator
 assert.ok(m.declarative_net_request.rule_resources.some(rs=>rs.id==="base_mining"&&rs.path==="rules/miners.json"),"Miner protection ruleset missing");
 assert.ok(read("options.html").includes('id="minersEnabled"'),"Miner blocking setting missing");
 assert.ok(read("background.js").includes("fetchJsonLimited"),"Secure filter download guard missing");
-console.log("All Rolex Key AdBlocker v3.7.0 validation checks passed.");
+console.log("All Rolex Key AdBlocker v3.8.0 validation checks passed.");
