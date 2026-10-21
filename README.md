@@ -25,7 +25,7 @@ Version 3.8.0 — Chromium Manifest V3 extension with expanded ad-network filter
 The vector source lives at `icons/rolex-key-adblocker.svg`. GitHub Actions generates 16, 32, 48, and 128 px PNG icons using `scripts/generate_icons.py`. The manifest uses PNG assets for the browser toolbar and extension listing.
 
 ## Releases and extension updates
-The official release center is [`releases.html`](releases.html), which displays the current update feed and fetches published release history from GitHub. The [GitHub Releases page](https://github.com/sajinstalin01/adblocker-extension/releases) is the canonical release/download page. `CHANGELOG.md` records version notes.
+The official release center is [`releases.html`](releases.html), which displays the current update feed and fetches published release history from GitHub. Once the GitHub Pages deployment completes, it is available at [the hosted release center](https://sajinstalin01.github.io/adblocker-extension/releases.html). The [GitHub Releases page](https://github.com/sajinstalin01/adblocker-extension/releases) is the canonical release/download page. `CHANGELOG.md` records version notes.
 
 For each release, update `manifest.json` to the new version and add a dated `## [x.y.z] - YYYY-MM-DD` section to `CHANGELOG.md`, then push a matching `vX.Y.Z` tag. The `Publish extension release` GitHub Actions workflow validates the tagged version, runs project validation, refreshes `update-feed.json`, and publishes a GitHub Release with a versioned ZIP. Ensure repository Actions permissions allow workflows to write contents/releases. You can also run the workflow manually with an existing version tag.
 
