@@ -1,0 +1,11 @@
+import fs from "node:fs";
+const version=process.argv[2];
+if(!version)throw new Error("Pass release version.");
+const text=fs.readFileSync("CHANGELOG.md","utf8");
+const escaped=version.replace(/[.*+?^${}()|[\\]\\\\]/g,"\\$&");
+const heading=new RegExp("^## \\["+escaped+"\\] - \\d{4}-\\d{2}-\\d{2}\\s*$","m");
+const match=text.match(heading);
+if(!match)throw new Error("No changelog section found for "+version);
+const start=match.index+match[0].length;
+const next=text.slice(start).search(/^## \\[/m);
+console.log(text.slice(start,next<0?undefined:start+next).trim()||("Rolex Key AdBlocker "+version));
