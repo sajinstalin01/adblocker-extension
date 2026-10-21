@@ -1,15 +1,15 @@
 {
   "schemaVersion": 1,
-  "latestVersion": "3.7.0",
-  "title": "Real-time ad cleanup and safer streaming controls",
-  "message": "Version 3.7.0 adds an early-running live ad cleanup helper, watches dynamic page changes, and clicks clearly labelled skip-ad controls where available. In-stream/server-inserted ads remain platform-dependent.",
+  "latestVersion": "3.8.0",
+  "title": "Expanded ad network protection",
+  "message": "Version 3.8.0 adds 27 bundled network filters for additional advertising, sponsored-content, measurement, and tracking endpoints. Cosmetic and in-stream video ad coverage remains platform-dependent.",
   "releaseUrl": "https://github.com/sajinstalin01/adblocker-extension/releases",
-  "publishedAt": "2026-10-20",
+  "publishedAt": "2026-10-21",
   "features": [
-    "Early document-start ad cleanup helper on supported video platforms",
-    "MutationObserver-based response to dynamically inserted ad elements",
-    "Clicks explicit Skip Ad controls where available",
-    "Preserves video players and avoids DRM/player manipulation",
-    "Existing network-level Declarative Net Request filtering remains active"
+    "Expanded bundled ad filter from 57 to 84 network rules",
+    "Additional ad-tech and sponsored-content domains",
+    "Keeps document-start cleanup and dynamic page monitoring",
+    "Existing tracker, privacy, miner and user filter controls remain available",
+    "No remote executable code is downloaded"
   ]
 }
