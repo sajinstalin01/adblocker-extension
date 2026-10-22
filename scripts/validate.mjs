@@ -30,4 +30,4 @@ assert.ok(read("scripts/generate_icons.py").includes("cairosvg"),"Icon generator
 assert.ok(m.declarative_net_request.rule_resources.some(rs=>rs.id==="base_mining"&&rs.path==="rules/miners.json"),"Miner protection ruleset missing");
 assert.ok(read("options.html").includes('id="minersEnabled"'),"Miner blocking setting missing");
 assert.ok(read("background.js").includes("fetchJsonLimited"),"Secure filter download guard missing");
-console.log("All Rolex Key AdBlocker v"+m.version+" validation checks passed.");
+assert.ok(m.version==="3.9.0" ? read("content-live-ad-blocker.js").includes("PLAYER_SKIP_SELECTORS") : true,"Explicit player skip selectors missing");assert.ok(read("content-live-ad-blocker.js").includes("skip\\\\s*intro"),"Skip Intro exclusion missing");assert.ok(read("content-live-ad-blocker.js").includes("lastSkipAt"),"Skip click rate limit missing");\nconsole.log("All Rolex Key AdBlocker v"+m.version+" validation checks passed.");
