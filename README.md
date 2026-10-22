@@ -1,6 +1,6 @@
 # Rolex Key AdBlocker
 
-Version 3.8.0 — Chromium Manifest V3 extension with expanded ad-network filtering, early-running live ad cleanup, safe skip-ad detection, and hardened filter validation.
+Version 3.9.0 — Chromium Manifest V3 extension with expanded ad-network filtering, early-running live ad cleanup, improved explicit Skip Ad detection, and hardened filter validation.
 
 ## Features
 - Expanded bundled ad network filtering (84 static rules), tracker, pop-up and optional known cryptomining-script filtering; safe daily/manual JSON filter refresh
@@ -10,7 +10,7 @@ Version 3.8.0 — Chromium Manifest V3 extension with expanded ad-network filter
 - Balanced, Strict, Minimal and Custom protection profiles
 - Optional heuristic anti-adblock overlay detection
 - Real-time ad cleanup helper starts at document start and reacts to dynamically inserted page elements on supported video sites
-- Attempts clearly labelled Skip Ad buttons when available; avoids manipulating video playback or DRM
+- Improved explicit Skip Ad button detection: clicks only visible/enabled ad-skip controls, ignores Skip Intro/Recap/Next Episode, and rate-limits clicks; does not manipulate video playback or DRM
 - YouTube Shorts blocking toggle and cosmetic cleanup of clearly marked YouTube ad cards/overlays (best effort; in-stream ads are not guaranteed to be blocked)
 - Optional device-local settings sign-in with PBKDF2 password hashing; ad blocking remains active without sign-in
 - Toggleable streaming-site cosmetic cleanup for clearly marked ad banners/sponsored placements on JioHotstar/Hotstar, Prime Video, SonyLIV, ZEE5, MX Player, YouTube, Twitch, and other major streaming sites
