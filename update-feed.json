@@ -1,15 +1,15 @@
 {
   "schemaVersion": 1,
-  "latestVersion": "3.8.0",
-  "title": "Expanded ad network protection",
-  "message": "Version 3.8.0 adds 27 bundled network filters for additional advertising, sponsored-content, measurement, and tracking endpoints. Cosmetic and in-stream video ad coverage remains platform-dependent.",
+  "latestVersion": "3.9.0",
+  "title": "Playback-safe skip-ad improvements",
+  "message": "Version 3.9.0 improves detection of explicit Skip Ad controls, throttles repeat clicks, and keeps ad cleanup away from video playback and DRM.",
   "releaseUrl": "https://github.com/sajinstalin01/adblocker-extension/releases",
-  "publishedAt": "2026-10-21",
+  "publishedAt": "2026-10-22",
   "features": [
-    "Expanded bundled ad filter from 57 to 84 network rules",
-    "Additional ad-tech and sponsored-content domains",
-    "Keeps document-start cleanup and dynamic page monitoring",
-    "Existing tracker, privacy, miner and user filter controls remain available",
-    "No remote executable code is downloaded"
+    "More reliable detection of explicit Skip Ad controls on supported sites",
+    "Clicks only visible, enabled controls clearly labelled for skipping or closing ads",
+    "Does not click Skip Intro, Skip Recap, or Next Episode controls",
+    "Restores page elements when protection is disabled or the site is allowlisted",
+    "Fail-open behavior: never manipulates video playback, media URLs, or DRM"
   ]
 }
