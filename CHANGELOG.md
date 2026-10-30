@@ -1,5 +1,11 @@
 # Changelog
 
+## [4.1.0] - 2026-10-30
+- Added separate counters for network requests matched by DNR, page ads hidden, ad skip clicks, and segment skips.
+- Added popup totals and detailed Settings statistics with local reset and backup support.
+- Clarified that network debug counters may be unavailable in normal store installs and action counts are not unique-ad estimates.
+
+
 ## [4.0.0] - 2026-10-30
 - Added 12 configurable segment-skip categories for sponsor, promotional, self-promotional, unpaid, non-music, intermission, intro, end-card, credit, greeting, preview, and recap segments.
 - Added explicit skip-control and segment metadata recognition with per-category settings.
