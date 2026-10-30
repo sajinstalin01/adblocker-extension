@@ -1,6 +1,6 @@
 const $ = (id) => document.getElementById(id);
 const SEGMENT_SKIP_DEFAULTS = {"sponsor":true,"promotion":true,"selfPromotion":true,"unpaid":true,"nonMusic":true,"intermission":true,"intro":true,"endcards":true,"credits":true,"greetings":true,"preview":true,"recap":true};
-const DEFAULTS = {segmentSkipOptions:SEGMENT_SKIP_DEFAULTS, enabled:true, trackersEnabled:true, privacyEnabled:true, minersEnabled:true, antiAdblockEnabled:false, readingModeEnabled:false, protectionProfile:"balanced", locale:"en", popupLayout:"comfortable", popupAccent:"mint", hidePopupStats:false, releaseNotesPending:false, allowlist:[], temporaryAllowlist:{}, customBlockDomains:[], communityFilterUrls:[], theme:"system", blockedCount:0, statsBySite:{}, recentBlocks:[], filterUpdate:{status:"not-run",updatedAt:null,message:"Not checked yet"}, extensionUpdate:{status:"not-checked"}};
+const DEFAULTS = {segmentSkipOptions:SEGMENT_SKIP_DEFAULTS, enabled:true, trackersEnabled:true, privacyEnabled:true, minersEnabled:true, antiAdblockEnabled:false, readingModeEnabled:false, protectionProfile:"balanced", locale:"en", popupLayout:"comfortable", popupAccent:"mint", hidePopupStats:false, releaseNotesPending:false, allowlist:[], temporaryAllowlist:{}, customBlockDomains:[], communityFilterUrls:[], theme:"system", blockedCount:0, pageAdsHidden:0, skipClicks:0, segmentSkips:0, actionStatsBySite:{}, statsBySite:{}, recentBlocks:[], filterUpdate:{status:"not-run",updatedAt:null,message:"Not checked yet"}, extensionUpdate:{status:"not-checked"}};
 function normalizeDomain(value) {
   let host = String(value || "").trim().toLowerCase().replace(/^https?:\/\//, "").split("/")[0].replace(/:\d+$/, "");
   return /^(?=.{1,253}$)([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)(\.([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?))*$/.test(host) ? host : null;
@@ -60,7 +60,10 @@ async function render() {
   renderUrlList("communityList", s.communityFilterUrls || []);
   renderDomainList("blockList", s.customBlockDomains || [], "customBlockDomains");
   $("totalBlocked").textContent = Number(s.blockedCount || 0).toLocaleString();
-  $("trackedSites").textContent = Object.keys(s.statsBySite || {}).length.toLocaleString();
+  $("totalPageAdsHidden").textContent=Number(s.pageAdsHidden||0).toLocaleString();
+  $("totalSkipClicks").textContent=Number(s.skipClicks||0).toLocaleString();
+  $("totalSegmentSkips").textContent=Number(s.segmentSkips||0).toLocaleString();
+  $("trackedSites").textContent = new Set([...Object.keys(s.statsBySite||{}),...Object.keys(s.actionStatsBySite||{})]).size.toLocaleString();
   const stats = $("siteStats"); stats.replaceChildren();
   Object.entries(s.statsBySite || {}).sort((a,b) => b[1]-a[1]).slice(0,10).forEach(([host,count]) => {
     const li=document.createElement("li"), name=document.createElement("span"), value=document.createElement("strong");
@@ -140,12 +143,12 @@ $("updateFilters").addEventListener("click", async () => {
   $("updateFilters").disabled = false; await render();
 });
 $("clearStats").addEventListener("click", async () => {
-  await chrome.storage.local.set({blockedCount:0,statsBySite:{},recentBlocks:[]});
+  await chrome.storage.local.set({blockedCount:0,pageAdsHidden:0,skipClicks:0,segmentSkips:0,actionStatsBySite:{},statsBySite:{},recentBlocks:[]});
   $("message").textContent = "Local statistics cleared."; await render();
 });
 $("exportData").addEventListener("click", async () => {
   const s = await settings();
-  const backup = {segmentSkipOptions:s.segmentSkipOptions,enabled:s.enabled,trackersEnabled:s.trackersEnabled,privacyEnabled:s.privacyEnabled,minersEnabled:s.minersEnabled,antiAdblockEnabled:s.antiAdblockEnabled,readingModeEnabled:s.readingModeEnabled,protectionProfile:s.protectionProfile,locale:s.locale,popupLayout:s.popupLayout,popupAccent:s.popupAccent,hidePopupStats:s.hidePopupStats,allowlist:s.allowlist,temporaryAllowlist:s.temporaryAllowlist,customBlockDomains:s.customBlockDomains,communityFilterUrls:s.communityFilterUrls,theme:s.theme,blockedCount:s.blockedCount,statsBySite:s.statsBySite,exportedAt:new Date().toISOString()};
+  const backup = {pageAdsHidden:s.pageAdsHidden,skipClicks:s.skipClicks,segmentSkips:s.segmentSkips,actionStatsBySite:s.actionStatsBySite,segmentSkipOptions:s.segmentSkipOptions,enabled:s.enabled,trackersEnabled:s.trackersEnabled,privacyEnabled:s.privacyEnabled,minersEnabled:s.minersEnabled,antiAdblockEnabled:s.antiAdblockEnabled,readingModeEnabled:s.readingModeEnabled,protectionProfile:s.protectionProfile,locale:s.locale,popupLayout:s.popupLayout,popupAccent:s.popupAccent,hidePopupStats:s.hidePopupStats,allowlist:s.allowlist,temporaryAllowlist:s.temporaryAllowlist,customBlockDomains:s.customBlockDomains,communityFilterUrls:s.communityFilterUrls,theme:s.theme,blockedCount:s.blockedCount,statsBySite:s.statsBySite,exportedAt:new Date().toISOString()};
   const blob = new Blob([JSON.stringify(backup,null,2)],{type:"application/json"});
   const url = URL.createObjectURL(blob), link=document.createElement("a");
   link.href=url; link.download="rolex-key-adblocker-settings.json"; link.click(); URL.revokeObjectURL(url);
@@ -181,7 +184,8 @@ $("importFile").addEventListener("change", async (event) => {
     if (data.temporaryAllowlist && typeof data.temporaryAllowlist==="object" && !Array.isArray(data.temporaryAllowlist)) {
       patch.temporaryAllowlist=Object.fromEntries(Object.entries(data.temporaryAllowlist).map(([host,expiresAt])=>[normalizeDomain(host),expiresAt]).filter(([host,expiresAt])=>host&&Number.isFinite(expiresAt)&&expiresAt>Date.now()).slice(0,500));
     }
-    if (Number.isFinite(data.blockedCount) && data.blockedCount>=0) patch.blockedCount=Math.floor(data.blockedCount);
+    for(const key of ["blockedCount","pageAdsHidden","skipClicks","segmentSkips"])if(Number.isFinite(data[key])&&data[key]>=0)patch[key]=Math.floor(data[key]);
+    if(data.actionStatsBySite&&typeof data.actionStatsBySite==="object"&&!Array.isArray(data.actionStatsBySite))patch.actionStatsBySite=data.actionStatsBySite;
     if (data.statsBySite && typeof data.statsBySite==="object" && !Array.isArray(data.statsBySite)) {
       patch.statsBySite=Object.fromEntries(Object.entries(data.statsBySite).filter(([k,v])=>typeof k==="string"&&Number.isFinite(v)&&v>=0).slice(0,500));
     }
