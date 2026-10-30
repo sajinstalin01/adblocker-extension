@@ -1,6 +1,6 @@
 # Rolex Key AdBlocker
 
-Version 3.9.0 — Chromium Manifest V3 extension with expanded ad-network filtering, early-running live ad cleanup, improved explicit Skip Ad detection, and hardened filter validation.
+Version 4.0.0 — Chromium Manifest V3 extension with expanded ad-network filtering, early-running live ad cleanup, improved explicit Skip Ad detection, and hardened filter validation.
 
 ## Features
 - Expanded bundled ad network filtering (84 static rules), tracker, pop-up and optional known cryptomining-script filtering; safe daily/manual JSON filter refresh
@@ -10,6 +10,7 @@ Version 3.9.0 — Chromium Manifest V3 extension with expanded ad-network filter
 - Balanced, Strict, Minimal and Custom protection profiles
 - Optional heuristic anti-adblock overlay detection
 - Real-time ad cleanup helper starts at document start and reacts to dynamically inserted page elements on supported video sites
+- Added 12 configurable segment-skip categories (sponsor, promotions, self-promotion, unpaid plugs, non-music sections, intermissions, intros, end cards, credits, greetings, previews and recaps); works only where a supported marker or explicit skip control exists
 - Improved explicit Skip Ad button detection: clicks only visible/enabled ad-skip controls, ignores Skip Intro/Recap/Next Episode, and rate-limits clicks; does not manipulate video playback or DRM
 - YouTube Shorts blocking toggle and cosmetic cleanup of clearly marked YouTube ad cards/overlays (best effort; in-stream ads are not guaranteed to be blocked)
 - Optional device-local settings sign-in with PBKDF2 password hashing; ad blocking remains active without sign-in
@@ -43,7 +44,7 @@ For desktop Chrome, Microsoft Edge, or Brave, download the [repository ZIP](http
 The optional sign-in is device-local and only gates the settings page UI. It does not create a cloud account, sync credentials, or protect against someone with access to the browser profile or extension files. Ad blocking works with sign-in disabled. Use a unique password.
 
 ## Limitations
-Reading mode changes presentation only and may not fit every layout. Anti-adblock detection is heuristic and may miss sites or produce false positives; disable it if a site behaves incorrectly. YouTube Shorts hiding and ad-card cleanup are best-effort and may need selector updates as YouTube changes its UI. Real-time video-site ad cleanup is best-effort. The bundled ad-network list has been expanded, but network filters cannot identify every ad request. Video-site cleanup is best-effort: it hides clearly marked page-level ad elements and clicks explicit skip controls where present. Ads inserted into the video stream or delivered from the same media endpoint (including some YouTube, Twitch, JioHotstar, and Prime Video ads) may still play. No browser extension can guarantee instant removal on every platform, and this extension deliberately avoids manipulating video playback or DRM. Detailed matched-rule counts may be unavailable in store installs.
+Reading mode changes presentation only and may not fit every layout. Anti-adblock detection is heuristic and may miss sites or produce false positives; disable it if a site behaves incorrectly. YouTube Shorts hiding and ad-card cleanup are best-effort and may need selector updates as YouTube changes its UI. Real-time video-site ad cleanup is best-effort. The bundled ad-network list has been expanded, but network filters cannot identify every ad request. Segment skipping is best-effort and relies on visible skip controls or page-provided segment metadata; it does not infer segments from audio/video. Video-site cleanup is best-effort: it hides clearly marked page-level ad elements and clicks explicit skip controls where present. Ads inserted into the video stream or delivered from the same media endpoint (including some YouTube, Twitch, JioHotstar, and Prime Video ads) may still play. No browser extension can guarantee instant removal on every platform, and this extension deliberately avoids manipulating video playback or DRM. Detailed matched-rule counts may be unavailable in store installs.
 
 ## Filter safety and permissions
 Filter sources must be trusted HTTPS JSON arrays in Chrome Declarative Net Request format; standard EasyList text is not parsed. Remote filter downloads are size-limited, redirects are rejected, and unsupported/overly broad rules are rejected before use. Community lists are still user-selected, so only subscribe to sources you trust. The optional miner rules block a small set of known browser-mining script domains; this is not a malware or phishing scanner and may cause site breakage if a site intentionally loads those scripts. The auditor explains declared permissions. `<all_urls>` is broad and supports cross-site filtering and page enhancements; browser site-access controls may limit execution. Audit results remain local.
