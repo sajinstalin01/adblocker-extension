@@ -1,15 +1,14 @@
 {
   "schemaVersion": 1,
-  "latestVersion": "3.9.0",
-  "title": "Playback-safe skip-ad improvements",
-  "message": "Version 3.9.0 improves detection of explicit Skip Ad controls, throttles repeat clicks, and keeps ad cleanup away from video playback and DRM.",
+  "latestVersion": "4.0.0",
+  "title": "Configurable advanced segment skipping",
+  "message": "Adds 12 configurable segment-skip categories with explicit control/metadata detection and playback-safe behavior.",
   "releaseUrl": "https://github.com/sajinstalin01/adblocker-extension/releases",
-  "publishedAt": "2026-10-22",
+  "publishedAt": "2026-10-30",
   "features": [
-    "More reliable detection of explicit Skip Ad controls on supported sites",
-    "Clicks only visible, enabled controls clearly labelled for skipping or closing ads",
-    "Does not click Skip Intro, Skip Recap, or Next Episode controls",
-    "Restores page elements when protection is disabled or the site is allowlisted",
-    "Fail-open behavior: never manipulates video playback, media URLs, or DRM"
+    "12 configurable segment categories including sponsor, promotional, intro, recap, credits and end cards",
+    "Skip actions only when a supported explicit control or segment marker is available",
+    "Per-category settings in the Options page",
+    "Allowlist-aware, rate-limited, fail-open behavior; no media or DRM manipulation"
   ]
 }
