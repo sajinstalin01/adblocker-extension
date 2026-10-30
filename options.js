@@ -1,5 +1,6 @@
 const $ = (id) => document.getElementById(id);
-const SEGMENT_SKIP_DEFAULTS = {"sponsor":true,"promotion":true,"selfPromotion":true,"unpaid":true,"nonMusic":true,"intermission":true,"intro":true,"endcards":true,"credits":true,"greetings":true,"preview":true,"recap":true};\nconst DEFAULTS = {segmentSkipOptions:SEGMENT_SKIP_DEFAULTS, enabled:true, trackersEnabled:true, privacyEnabled:true, minersEnabled:true, antiAdblockEnabled:false, readingModeEnabled:false, protectionProfile:"balanced", locale:"en", popupLayout:"comfortable", popupAccent:"mint", hidePopupStats:false, releaseNotesPending:false, allowlist:[], temporaryAllowlist:{}, customBlockDomains:[], communityFilterUrls:[], theme:"system", blockedCount:0, statsBySite:{}, recentBlocks:[], filterUpdate:{status:"not-run",updatedAt:null,message:"Not checked yet"}, extensionUpdate:{status:"not-checked"}};
+const SEGMENT_SKIP_DEFAULTS = {"sponsor":true,"promotion":true,"selfPromotion":true,"unpaid":true,"nonMusic":true,"intermission":true,"intro":true,"endcards":true,"credits":true,"greetings":true,"preview":true,"recap":true};
+const DEFAULTS = {segmentSkipOptions:SEGMENT_SKIP_DEFAULTS, enabled:true, trackersEnabled:true, privacyEnabled:true, minersEnabled:true, antiAdblockEnabled:false, readingModeEnabled:false, protectionProfile:"balanced", locale:"en", popupLayout:"comfortable", popupAccent:"mint", hidePopupStats:false, releaseNotesPending:false, allowlist:[], temporaryAllowlist:{}, customBlockDomains:[], communityFilterUrls:[], theme:"system", blockedCount:0, statsBySite:{}, recentBlocks:[], filterUpdate:{status:"not-run",updatedAt:null,message:"Not checked yet"}, extensionUpdate:{status:"not-checked"}};
 function normalizeDomain(value) {
   let host = String(value || "").trim().toLowerCase().replace(/^https?:\/\//, "").split("/")[0].replace(/:\d+$/, "");
   return /^(?=.{1,253}$)([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)(\.([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?))*$/.test(host) ? host : null;
@@ -52,7 +53,8 @@ function renderDomainList(elementId, hosts, storageKey) {
 async function render() {
   const s = await settings();
   $("enabled").checked = s.enabled; $("trackersEnabled").checked = s.trackersEnabled; $("privacyEnabled").checked = s.privacyEnabled; $("minersEnabled").checked = s.minersEnabled !== false; $("theme").value = s.theme;
-  setTheme(s.theme);\n  const segmentOptions={...SEGMENT_SKIP_DEFAULTS,...(s.segmentSkipOptions||{})}; document.querySelectorAll("[data-segment-option]").forEach(input=>{input.checked=segmentOptions[input.dataset.segmentOption]!==false;});
+  setTheme(s.theme);
+  const segmentOptions={...SEGMENT_SKIP_DEFAULTS,...(s.segmentSkipOptions||{})}; document.querySelectorAll("[data-segment-option]").forEach(input=>{input.checked=segmentOptions[input.dataset.segmentOption]!==false;});
   renderDomainList("allowList", s.allowlist || [], "allowlist");
   renderTemporaryAllowlist(s.temporaryAllowlist || {});
   renderUrlList("communityList", s.communityFilterUrls || []);
@@ -87,7 +89,8 @@ $("trackersEnabled").addEventListener("change", (e) => chrome.storage.local.set(
 $("privacyEnabled").addEventListener("change", (e) => chrome.storage.local.set({privacyEnabled:e.target.checked}));
 $("minersEnabled").addEventListener("change", (e) => chrome.storage.local.set({minersEnabled:e.target.checked}));
 $("theme").addEventListener("change", async (e) => { await chrome.storage.local.set({theme:e.target.value}); setTheme(e.target.value); });
-document.querySelectorAll("[data-segment-option]").forEach(input=>input.addEventListener("change",async()=>{const latest=await chrome.storage.local.get({segmentSkipOptions:SEGMENT_SKIP_DEFAULTS});await chrome.storage.local.set({segmentSkipOptions:{...SEGMENT_SKIP_DEFAULTS,...latest.segmentSkipOptions,[input.dataset.segmentOption]:input.checked}});$("segmentSkipStatus").textContent="Saved. Supported segment controls will be skipped when detected."; }));\nbindDomainForm("allowForm","allowHost","allowlist","Allowed ");
+document.querySelectorAll("[data-segment-option]").forEach(input=>input.addEventListener("change",async()=>{const latest=await chrome.storage.local.get({segmentSkipOptions:SEGMENT_SKIP_DEFAULTS});await chrome.storage.local.set({segmentSkipOptions:{...SEGMENT_SKIP_DEFAULTS,...latest.segmentSkipOptions,[input.dataset.segmentOption]:input.checked}});$("segmentSkipStatus").textContent="Saved. Supported segment controls will be skipped when detected."; }));
+bindDomainForm("allowForm","allowHost","allowlist","Allowed ");
 $("tempAllowForm").addEventListener("submit",async(event)=>{
   event.preventDefault();
   const host=normalizeDomain($("tempAllowHost").value);
@@ -159,7 +162,8 @@ $("importFile").addEventListener("change", async (event) => {
   try {
     if (file.size > 1024*1024) throw new Error("File is larger than 1 MB.");
     const data=JSON.parse(await file.text());
-    const patch={};\n    if(data.segmentSkipOptions&&typeof data.segmentSkipOptions==="object"&&!Array.isArray(data.segmentSkipOptions))patch.segmentSkipOptions=Object.fromEntries(Object.keys(SEGMENT_SKIP_DEFAULTS).map(k=>[k,typeof data.segmentSkipOptions[k]==="boolean"?data.segmentSkipOptions[k]:SEGMENT_SKIP_DEFAULTS[k]]));
+    const patch={};
+    if(data.segmentSkipOptions&&typeof data.segmentSkipOptions==="object"&&!Array.isArray(data.segmentSkipOptions))patch.segmentSkipOptions=Object.fromEntries(Object.keys(SEGMENT_SKIP_DEFAULTS).map(k=>[k,typeof data.segmentSkipOptions[k]==="boolean"?data.segmentSkipOptions[k]:SEGMENT_SKIP_DEFAULTS[k]]));
     if (typeof data.enabled==="boolean") patch.enabled=data.enabled;
     if (typeof data.trackersEnabled==="boolean") patch.trackersEnabled=data.trackersEnabled;
     if (typeof data.privacyEnabled==="boolean") patch.privacyEnabled=data.privacyEnabled;
