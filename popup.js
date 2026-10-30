@@ -2,7 +2,7 @@ const $ = (id) => document.getElementById(id);
 let currentHost = "", isAllowlisted = false, temporaryAllowHost = "";
 async function render() {
   const settings = await chrome.storage.local.get({
-    enabled: true, trackersEnabled: true, allowlist: [], temporaryAllowlist: {}, blockedCount: 0, theme: "system", filterUpdate: {status:"not-run"}, popupLayout:"comfortable", popupAccent:"mint", hidePopupStats:false, locale:"en", extensionUpdate:{status:"not-checked"}
+    enabled: true, trackersEnabled: true, allowlist: [], temporaryAllowlist: {}, blockedCount: 0, pageAdsHidden:0, skipClicks:0, segmentSkips:0, theme: "system", filterUpdate: {status:"not-run"}, popupLayout:"comfortable", popupAccent:"mint", hidePopupStats:false, locale:"en", extensionUpdate:{status:"not-checked"}
   });
   const theme = settings.theme === "system"
     ? (matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark")
@@ -10,6 +10,8 @@ async function render() {
   document.documentElement.dataset.theme = theme;
   document.documentElement.dataset.layout=settings.popupLayout;document.documentElement.dataset.accent=settings.popupAccent;document.documentElement.lang=settings.locale==="ml"?"ml":"en";$("stats").hidden=!!settings.hidePopupStats;
   $("blocked").textContent = Number(settings.blockedCount || 0).toLocaleString();
+  $("pageAdsHidden").textContent = Number(settings.pageAdsHidden || 0).toLocaleString();
+  $("skipClicks").textContent = (Number(settings.skipClicks || 0)+Number(settings.segmentSkips || 0)).toLocaleString();
   $("status").textContent = settings.enabled ? "Protection enabled" : "Protection paused";
   $("dot").classList.toggle("off", !settings.enabled);
   $("toggle").classList.toggle("off", !settings.enabled);
