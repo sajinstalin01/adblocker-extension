@@ -1,14 +1,14 @@
 {
   "schemaVersion": 1,
-  "latestVersion": "4.0.0",
-  "title": "Configurable advanced segment skipping",
-  "message": "Adds 12 configurable segment-skip categories with explicit control/metadata detection and playback-safe behavior.",
+  "latestVersion": "4.1.0",
+  "title": "Detailed ad blocking counters",
+  "message": "Shows separate totals for network requests matched, page ads hidden, ad skip clicks and segment skips.",
   "releaseUrl": "https://github.com/sajinstalin01/adblocker-extension/releases",
   "publishedAt": "2026-10-30",
   "features": [
-    "12 configurable segment categories including sponsor, promotional, intro, recap, credits and end cards",
-    "Skip actions only when a supported explicit control or segment marker is available",
-    "Per-category settings in the Options page",
-    "Allowlist-aware, rate-limited, fail-open behavior; no media or DRM manipulation"
+    "Popup counters for network requests, page ads hidden and skip actions",
+    "Settings breakdown for network matches, cosmetic hides, ad skips and segment skips",
+    "Local statistics reset and backup support",
+    "Counters are action totals, not estimates of unique ads or money saved"
   ]
 }
