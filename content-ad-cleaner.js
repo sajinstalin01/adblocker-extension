@@ -26,7 +26,8 @@
     } catch (_) { return true; }
   }
 
-  function reportAdAction(element,kind){if(!element||element.hasAttribute("data-rolex-ad-counted"))return;element.setAttribute("data-rolex-ad-counted","1");try{chrome.runtime.sendMessage({type:"record-ad-action",kind}).catch(()=>{});}catch(_){}}\n  function hideAdSlots() {
+  function reportAdAction(element,kind){if(!element||element.hasAttribute("data-rolex-ad-counted"))return;element.setAttribute("data-rolex-ad-counted","1");try{chrome.runtime.sendMessage({type:"record-ad-action",kind}).catch(()=>{});}catch(_){}}
+  function hideAdSlots() {
     for (const element of document.querySelectorAll(AD_SELECTORS.join(","))) {
       if (element.hasAttribute(HIDDEN_ATTR)) continue;
       if (element.closest("header, nav, main") &&
