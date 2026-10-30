@@ -1,5 +1,11 @@
 # Changelog
 
+## [4.0.0] - 2026-10-30
+- Added 12 configurable segment-skip categories for sponsor, promotional, self-promotional, unpaid, non-music, intermission, intro, end-card, credit, greeting, preview, and recap segments.
+- Added explicit skip-control and segment metadata recognition with per-category settings.
+- Preserved allowlists, rate-limited clicks, and fail-open playback-safe behavior; no audio/video analysis or DRM manipulation.
+
+
 All notable project releases are recorded here. Release automation expects a matching section for each tag (for example, tag `v3.9.0` requires `## [3.9.0] - YYYY-MM-DD`).
 
 ## [3.9.0] - 2026-10-22
