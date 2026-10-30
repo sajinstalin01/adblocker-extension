@@ -9,7 +9,7 @@ const DEFAULTS = {
   customBlockDomains: [],
   communityFilterUrls: [],
   theme: "system",
-  blockedCount: 0,
+  blockedCount: 0,\n  pageAdsHidden: 0,\n  skipClicks: 0,\n  segmentSkips: 0,\n  actionStatsBySite: {},
   statsBySite: {},
   recentBlocks: [],
   filterUpdate: { status: "not-run", updatedAt: null, message: "Not checked yet" },
@@ -311,7 +311,7 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     updateRemoteFilters().then(async () => sendResponse((await getSettings()).filterUpdate));
     return true;
   }
-  if (message?.type === "get-tab-status") {
+  if (message?.type === "record-ad-action") {\n    const kind = ["pageAdHidden","skipClicked","segmentSkipped"].includes(message.kind) ? message.kind : null;\n    if (!kind) { sendResponse({ok:false}); return false; }\n    const host = (() => { try { return new URL(_sender.url || _sender.tab?.url || "").hostname.toLowerCase() || "unknown"; } catch (_) { return "unknown"; } })();\n    statsQueue = statsQueue.then(async () => {\n      const s = await getSettings();\n      const key = kind === "pageAdHidden" ? "pageAdsHidden" : kind === "skipClicked" ? "skipClicks" : "segmentSkips";\n      const actionStatsBySite = {...(s.actionStatsBySite || {})};\n      actionStatsBySite[host] = {...(actionStatsBySite[host] || {}), [key]: ((actionStatsBySite[host] || {})[key] || 0) + 1};\n      await chrome.storage.local.set({[key]:(s[key] || 0) + 1, actionStatsBySite});\n    }).then(() => sendResponse({ok:true})).catch(() => sendResponse({ok:false}));\n    return true;\n  }\n  if (message?.type === "get-tab-status") {
     getSettings().then((settings) => sendResponse({ enabled: settings.enabled, trackersEnabled: settings.trackersEnabled }));
     return true;
   }
