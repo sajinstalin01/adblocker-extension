@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.3.0] - 2026-10-31
+- Rebuilt automatic ad/segment skip detection to act as soon as visible, enabled skip controls appear, including ad countdown controls and supported segment metadata.
+- Added a master automatic-skip setting while preserving the 12 individual segment category toggles and allowlist behavior.
+- Added SponsorBlock-style category metadata mapping where a page exposes those attributes; no audio/video fingerprinting or DRM manipulation.
+- Reduced repeated work with cached settings, targeted player control scans, mutation coalescing and click throttling.
+- Kept conservative exclusions for unrelated controls such as Next Episode and generic navigation buttons; in-stream ads without a skip control remain outside extension control.
+
+
 ## [4.2.0] - 2026-10-31
 - Added an Advanced Control Center with local statistics, action/network timeline, per-site allowlist controls, diagnostics and debug console.
 - Added a mutation-aware conservative page-ad classifier, floating-ad cleanup and optional explicit cookie rejection controls.
