@@ -1,6 +1,6 @@
 const $ = (id) => document.getElementById(id);
 const SEGMENT_SKIP_DEFAULTS = {"sponsor":true,"promotion":true,"selfPromotion":true,"unpaid":true,"nonMusic":true,"intermission":true,"intro":true,"endcards":true,"credits":true,"greetings":true,"preview":true,"recap":true};
-const DEFAULTS = {autoSkipEnabled:true,segmentSkipOptions:SEGMENT_SKIP_DEFAULTS, enabled:true, trackersEnabled:true, privacyEnabled:true, minersEnabled:true, antiAdblockEnabled:false, readingModeEnabled:false, protectionProfile:"balanced", locale:"en", popupLayout:"comfortable", popupAccent:"mint", hidePopupStats:false, releaseNotesPending:false, allowlist:[], temporaryAllowlist:{}, customBlockDomains:[], communityFilterUrls:[], theme:"system", blockedCount:0, pageAdsHidden:0, skipClicks:0, segmentSkips:0, actionStatsBySite:{}, statsBySite:{}, recentBlocks:[], filterUpdate:{status:"not-run",updatedAt:null,message:"Not checked yet"}, extensionUpdate:{status:"not-checked"}};
+const DEFAULTS = {adLeakDetectionEnabled:true,dailymotionProtectionEnabled:true,antiAdblockAlertsEnabled:true,adNotificationsEnabled:true,adLeakEvents:[],adLeakCount:0,antiAdblockWarningCount:0,autoSkipEnabled:true,segmentSkipOptions:SEGMENT_SKIP_DEFAULTS, enabled:true, trackersEnabled:true, privacyEnabled:true, minersEnabled:true, antiAdblockEnabled:false, readingModeEnabled:false, protectionProfile:"balanced", locale:"en", popupLayout:"comfortable", popupAccent:"mint", hidePopupStats:false, releaseNotesPending:false, allowlist:[], temporaryAllowlist:{}, customBlockDomains:[], communityFilterUrls:[], theme:"system", blockedCount:0, pageAdsHidden:0, skipClicks:0, segmentSkips:0, actionStatsBySite:{}, statsBySite:{}, recentBlocks:[], filterUpdate:{status:"not-run",updatedAt:null,message:"Not checked yet"}, extensionUpdate:{status:"not-checked"}};
 function normalizeDomain(value) {
   let host = String(value || "").trim().toLowerCase().replace(/^https?:\/\//, "").split("/")[0].replace(/:\d+$/, "");
   return /^(?=.{1,253}$)([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)(\.([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?))*$/.test(host) ? host : null;
@@ -55,6 +55,12 @@ async function render() {
   $("enabled").checked = s.enabled; $("trackersEnabled").checked = s.trackersEnabled; $("privacyEnabled").checked = s.privacyEnabled; $("minersEnabled").checked = s.minersEnabled !== false; $("theme").value = s.theme;
   setTheme(s.theme);
   $("autoSkipEnabled").checked=s.autoSkipEnabled!==false;
+  for(const id of ["adLeakDetectionEnabled","dailymotionProtectionEnabled","antiAdblockAlertsEnabled","adNotificationsEnabled"]) $(id).checked=s[id]!==false;
+  $("adLeakCount").textContent=Number(s.adLeakCount||0).toLocaleString();
+  $("antiAdblockWarningCount").textContent=Number(s.antiAdblockWarningCount||0).toLocaleString();
+  const intelList=$("adLeakEventList"); intelList.replaceChildren();
+  (s.adLeakEvents||[]).slice(0,12).forEach(event=>{const li=document.createElement("li");li.textContent=new Date(event.at).toLocaleString()+" · "+event.host+" · "+event.type+" · "+event.detail;intelList.append(li);});
+
   const segmentOptions={...SEGMENT_SKIP_DEFAULTS,...(s.segmentSkipOptions||{})}; document.querySelectorAll("[data-segment-option]").forEach(input=>{input.checked=segmentOptions[input.dataset.segmentOption]!==false;});
   renderDomainList("allowList", s.allowlist || [], "allowlist");
   renderTemporaryAllowlist(s.temporaryAllowlist || {});
@@ -144,13 +150,15 @@ $("updateFilters").addEventListener("click", async () => {
   } catch (error) { $("updateStatus").textContent = "Update failed: " + error.message; }
   $("updateFilters").disabled = false; await render();
 });
+for(const id of ["adLeakDetectionEnabled","dailymotionProtectionEnabled","antiAdblockAlertsEnabled","adNotificationsEnabled"]) $(id).addEventListener("change",async()=>{await chrome.storage.local.set({[id]:$(id).checked});});
+$("clearAdLeakEvents").addEventListener("click",async()=>{await chrome.storage.local.set({adLeakEvents:[],adLeakCount:0,antiAdblockWarningCount:0});await render();});
 $("clearStats").addEventListener("click", async () => {
   await chrome.storage.local.set({blockedCount:0,pageAdsHidden:0,skipClicks:0,segmentSkips:0,actionStatsBySite:{},statsBySite:{},recentBlocks:[]});
   $("message").textContent = "Local statistics cleared."; await render();
 });
 $("exportData").addEventListener("click", async () => {
   const s = await settings();
-  const backup = {autoSkipEnabled:s.autoSkipEnabled,pageAdsHidden:s.pageAdsHidden,skipClicks:s.skipClicks,segmentSkips:s.segmentSkips,actionStatsBySite:s.actionStatsBySite,segmentSkipOptions:s.segmentSkipOptions,enabled:s.enabled,trackersEnabled:s.trackersEnabled,privacyEnabled:s.privacyEnabled,minersEnabled:s.minersEnabled,antiAdblockEnabled:s.antiAdblockEnabled,readingModeEnabled:s.readingModeEnabled,protectionProfile:s.protectionProfile,locale:s.locale,popupLayout:s.popupLayout,popupAccent:s.popupAccent,hidePopupStats:s.hidePopupStats,allowlist:s.allowlist,temporaryAllowlist:s.temporaryAllowlist,customBlockDomains:s.customBlockDomains,communityFilterUrls:s.communityFilterUrls,theme:s.theme,blockedCount:s.blockedCount,statsBySite:s.statsBySite,exportedAt:new Date().toISOString()};
+  const backup = {adLeakDetectionEnabled:s.adLeakDetectionEnabled,dailymotionProtectionEnabled:s.dailymotionProtectionEnabled,antiAdblockAlertsEnabled:s.antiAdblockAlertsEnabled,adNotificationsEnabled:s.adNotificationsEnabled,adLeakEvents:s.adLeakEvents,adLeakCount:s.adLeakCount,antiAdblockWarningCount:s.antiAdblockWarningCount,autoSkipEnabled:s.autoSkipEnabled,pageAdsHidden:s.pageAdsHidden,skipClicks:s.skipClicks,segmentSkips:s.segmentSkips,actionStatsBySite:s.actionStatsBySite,segmentSkipOptions:s.segmentSkipOptions,enabled:s.enabled,trackersEnabled:s.trackersEnabled,privacyEnabled:s.privacyEnabled,minersEnabled:s.minersEnabled,antiAdblockEnabled:s.antiAdblockEnabled,readingModeEnabled:s.readingModeEnabled,protectionProfile:s.protectionProfile,locale:s.locale,popupLayout:s.popupLayout,popupAccent:s.popupAccent,hidePopupStats:s.hidePopupStats,allowlist:s.allowlist,temporaryAllowlist:s.temporaryAllowlist,customBlockDomains:s.customBlockDomains,communityFilterUrls:s.communityFilterUrls,theme:s.theme,blockedCount:s.blockedCount,statsBySite:s.statsBySite,exportedAt:new Date().toISOString()};
   const blob = new Blob([JSON.stringify(backup,null,2)],{type:"application/json"});
   const url = URL.createObjectURL(blob), link=document.createElement("a");
   link.href=url; link.download="rolex-key-adblocker-settings.json"; link.click(); URL.revokeObjectURL(url);
@@ -169,6 +177,7 @@ $("importFile").addEventListener("change", async (event) => {
     const data=JSON.parse(await file.text());
     const patch={};
     if(typeof data.autoSkipEnabled==="boolean")patch.autoSkipEnabled=data.autoSkipEnabled;
+    for(const key of ["adLeakDetectionEnabled","dailymotionProtectionEnabled","antiAdblockAlertsEnabled","adNotificationsEnabled"])if(typeof data[key]==="boolean")patch[key]=data[key];
     if(data.segmentSkipOptions&&typeof data.segmentSkipOptions==="object"&&!Array.isArray(data.segmentSkipOptions))patch.segmentSkipOptions=Object.fromEntries(Object.keys(SEGMENT_SKIP_DEFAULTS).map(k=>[k,typeof data.segmentSkipOptions[k]==="boolean"?data.segmentSkipOptions[k]:SEGMENT_SKIP_DEFAULTS[k]]));
     if (typeof data.enabled==="boolean") patch.enabled=data.enabled;
     if (typeof data.trackersEnabled==="boolean") patch.trackersEnabled=data.trackersEnabled;
