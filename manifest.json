@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Rolex Key AdBlocker",
-  "version": "4.4.0",
-  "description": "Faster automatic ad and segment skipping with optimized player detection and configurable skip controls.",
+  "version": "4.5.0",
+  "description": "Expanded YouTube and Dailymotion ad-leak detection, anti-adblock alerts and local notification history.",
   "permissions": [
     "storage",
     "alarms",
@@ -48,6 +48,16 @@
         "content-streaming-cleaner.js",
         "content-youtube.js",
         "advanced-content.js"
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "http://*/*",
+        "https://*/*"
+      ],
+      "js": [
+        "content-ad-intelligence.js"
       ],
       "run_at": "document_idle"
     }
