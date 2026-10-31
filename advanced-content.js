@@ -17,6 +17,21 @@ if(a.floatingAdCleanup!==false)for(const el of document.querySelectorAll("[class
 if(a.cookieCleanup){for(const el of document.querySelectorAll("[role=dialog],[aria-modal=true],aside,section")){if(!visible(el))continue;const t=(el.innerText||"").slice(0,700).toLowerCase();if(!/(cookie|cookies|consent|privacy choices)/.test(t)||!/(accept|reject|manage|preferences)/.test(t))continue;const b=[...el.querySelectorAll("button")].find(x=>/reject all|necessary only|decline optional/i.test(x.innerText||x.getAttribute("aria-label")||""));if(b&&!b.disabled){b.click();event("cookie-choice","Explicit reject/necessary-only control");}}}
 if(a.customCssEnabled!==false)for(const r of s.customElementRules?.[host]||[]){try{if(r.selector&&r.selector.length<500)document.querySelectorAll(r.selector).forEach(el=>{if(el instanceof HTMLElement&&!el.matches("body,main,article,video"))el.style.setProperty("display","none","important");});}catch(_){}}
 }
-function init(){clean();let queued=false;new MutationObserver(()=>{if(queued)return;queued=true;requestAnimationFrame(()=>{queued=false;clean();});}).observe(document.documentElement,{childList:true,subtree:true});chrome.storage.onChanged.addListener(clean);}
+function warnSuspiciousHost(settings){
+  if(settings.advancedSettings?.phishingWarnings===false)return;
+  const puny=host.includes("xn--"),ip=/^(?:\\d{1,3}\\.){3}\\d{1,3}$/.test(host);
+  const brands=["google","microsoft","apple","paypal","amazon","facebook","instagram","netflix"];
+  const lookalike=brands.some(b=>host.includes(b)&&!host.endsWith("."+b+".com")&&!host.endsWith(b+".com")&&host.split(".").some(part=>part.includes(b)&&part!==b));
+  if(!puny&&!ip&&!lookalike)return;
+  if(document.getElementById("rolex-suspicious-host-warning"))return;
+  const bar=document.createElement("div");bar.id="rolex-suspicious-host-warning";bar.textContent="Rolex Key warning: this address has characteristics sometimes used by deceptive websites. Verify the domain before entering passwords or payment details.";
+  Object.assign(bar.style,{position:"fixed",top:"0",left:"0",right:"0",zIndex:"2147483647",padding:"12px 18px",background:"#8b241e",color:"#fff",font:"bold 14px system-ui",textAlign:"center",boxShadow:"0 2px 12px #0008"});
+  (document.documentElement||document.body).appendChild(bar);event("suspicious-host-warning","Heuristic hostname warning");
+ }
+ function monitorBrokenPage(){
+  let errors=0;window.addEventListener("error",()=>{errors++;},{capture:true});
+  setTimeout(()=>{const text=(document.body?.innerText||"").trim();const blank=!text&&!(document.querySelector("img,video,canvas,iframe,main,[role=main]"));if((blank||errors>=8)&&!document.getElementById("rolex-recovery-hint")){const hint=document.createElement("div");hint.id="rolex-recovery-hint";hint.textContent="Rolex Key detected a possibly incomplete page load. Try reloading, or temporarily allow this website if content is missing.";Object.assign(hint.style,{position:"fixed",bottom:"12px",right:"12px",zIndex:"2147483646",maxWidth:"340px",padding:"12px",background:"#172b3b",color:"#fff",borderRadius:"10px",font:"13px system-ui",boxShadow:"0 4px 18px #0008"});document.documentElement.appendChild(hint);event("possible-page-load-issue","Blank page or repeated resource errors");}},8000);
+ }
+function init(){clean();chrome.storage.local.get({advancedSettings:{}}).then(warnSuspiciousHost);monitorBrokenPage();let queued=false;new MutationObserver(()=>{if(queued)return;queued=true;requestAnimationFrame(()=>{queued=false;clean();});}).observe(document.documentElement,{childList:true,subtree:true});chrome.storage.onChanged.addListener(clean);}
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init,{once:true});else init();
 })();
