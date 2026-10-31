@@ -1,6 +1,6 @@
 const $ = (id) => document.getElementById(id);
 const SEGMENT_SKIP_DEFAULTS = {"sponsor":true,"promotion":true,"selfPromotion":true,"unpaid":true,"nonMusic":true,"intermission":true,"intro":true,"endcards":true,"credits":true,"greetings":true,"preview":true,"recap":true};
-const DEFAULTS = {segmentSkipOptions:SEGMENT_SKIP_DEFAULTS, enabled:true, trackersEnabled:true, privacyEnabled:true, minersEnabled:true, antiAdblockEnabled:false, readingModeEnabled:false, protectionProfile:"balanced", locale:"en", popupLayout:"comfortable", popupAccent:"mint", hidePopupStats:false, releaseNotesPending:false, allowlist:[], temporaryAllowlist:{}, customBlockDomains:[], communityFilterUrls:[], theme:"system", blockedCount:0, pageAdsHidden:0, skipClicks:0, segmentSkips:0, actionStatsBySite:{}, statsBySite:{}, recentBlocks:[], filterUpdate:{status:"not-run",updatedAt:null,message:"Not checked yet"}, extensionUpdate:{status:"not-checked"}};
+const DEFAULTS = {autoSkipEnabled:true,segmentSkipOptions:SEGMENT_SKIP_DEFAULTS, enabled:true, trackersEnabled:true, privacyEnabled:true, minersEnabled:true, antiAdblockEnabled:false, readingModeEnabled:false, protectionProfile:"balanced", locale:"en", popupLayout:"comfortable", popupAccent:"mint", hidePopupStats:false, releaseNotesPending:false, allowlist:[], temporaryAllowlist:{}, customBlockDomains:[], communityFilterUrls:[], theme:"system", blockedCount:0, pageAdsHidden:0, skipClicks:0, segmentSkips:0, actionStatsBySite:{}, statsBySite:{}, recentBlocks:[], filterUpdate:{status:"not-run",updatedAt:null,message:"Not checked yet"}, extensionUpdate:{status:"not-checked"}};
 function normalizeDomain(value) {
   let host = String(value || "").trim().toLowerCase().replace(/^https?:\/\//, "").split("/")[0].replace(/:\d+$/, "");
   return /^(?=.{1,253}$)([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)(\.([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?))*$/.test(host) ? host : null;
@@ -54,6 +54,7 @@ async function render() {
   const s = await settings();
   $("enabled").checked = s.enabled; $("trackersEnabled").checked = s.trackersEnabled; $("privacyEnabled").checked = s.privacyEnabled; $("minersEnabled").checked = s.minersEnabled !== false; $("theme").value = s.theme;
   setTheme(s.theme);
+  $("autoSkipEnabled").checked=s.autoSkipEnabled!==false;
   const segmentOptions={...SEGMENT_SKIP_DEFAULTS,...(s.segmentSkipOptions||{})}; document.querySelectorAll("[data-segment-option]").forEach(input=>{input.checked=segmentOptions[input.dataset.segmentOption]!==false;});
   renderDomainList("allowList", s.allowlist || [], "allowlist");
   renderTemporaryAllowlist(s.temporaryAllowlist || {});
@@ -91,6 +92,7 @@ $("enabled").addEventListener("change", (e) => chrome.storage.local.set({enabled
 $("trackersEnabled").addEventListener("change", (e) => chrome.storage.local.set({trackersEnabled:e.target.checked}));
 $("privacyEnabled").addEventListener("change", (e) => chrome.storage.local.set({privacyEnabled:e.target.checked}));
 $("minersEnabled").addEventListener("change", (e) => chrome.storage.local.set({minersEnabled:e.target.checked}));
+$("autoSkipEnabled").addEventListener("change", (e) => chrome.storage.local.set({autoSkipEnabled:e.target.checked}));
 $("theme").addEventListener("change", async (e) => { await chrome.storage.local.set({theme:e.target.value}); setTheme(e.target.value); });
 document.querySelectorAll("[data-segment-option]").forEach(input=>input.addEventListener("change",async()=>{const latest=await chrome.storage.local.get({segmentSkipOptions:SEGMENT_SKIP_DEFAULTS});await chrome.storage.local.set({segmentSkipOptions:{...SEGMENT_SKIP_DEFAULTS,...latest.segmentSkipOptions,[input.dataset.segmentOption]:input.checked}});$("segmentSkipStatus").textContent="Saved. Supported segment controls will be skipped when detected."; }));
 bindDomainForm("allowForm","allowHost","allowlist","Allowed ");
@@ -148,7 +150,7 @@ $("clearStats").addEventListener("click", async () => {
 });
 $("exportData").addEventListener("click", async () => {
   const s = await settings();
-  const backup = {pageAdsHidden:s.pageAdsHidden,skipClicks:s.skipClicks,segmentSkips:s.segmentSkips,actionStatsBySite:s.actionStatsBySite,segmentSkipOptions:s.segmentSkipOptions,enabled:s.enabled,trackersEnabled:s.trackersEnabled,privacyEnabled:s.privacyEnabled,minersEnabled:s.minersEnabled,antiAdblockEnabled:s.antiAdblockEnabled,readingModeEnabled:s.readingModeEnabled,protectionProfile:s.protectionProfile,locale:s.locale,popupLayout:s.popupLayout,popupAccent:s.popupAccent,hidePopupStats:s.hidePopupStats,allowlist:s.allowlist,temporaryAllowlist:s.temporaryAllowlist,customBlockDomains:s.customBlockDomains,communityFilterUrls:s.communityFilterUrls,theme:s.theme,blockedCount:s.blockedCount,statsBySite:s.statsBySite,exportedAt:new Date().toISOString()};
+  const backup = {autoSkipEnabled:s.autoSkipEnabled,pageAdsHidden:s.pageAdsHidden,skipClicks:s.skipClicks,segmentSkips:s.segmentSkips,actionStatsBySite:s.actionStatsBySite,segmentSkipOptions:s.segmentSkipOptions,enabled:s.enabled,trackersEnabled:s.trackersEnabled,privacyEnabled:s.privacyEnabled,minersEnabled:s.minersEnabled,antiAdblockEnabled:s.antiAdblockEnabled,readingModeEnabled:s.readingModeEnabled,protectionProfile:s.protectionProfile,locale:s.locale,popupLayout:s.popupLayout,popupAccent:s.popupAccent,hidePopupStats:s.hidePopupStats,allowlist:s.allowlist,temporaryAllowlist:s.temporaryAllowlist,customBlockDomains:s.customBlockDomains,communityFilterUrls:s.communityFilterUrls,theme:s.theme,blockedCount:s.blockedCount,statsBySite:s.statsBySite,exportedAt:new Date().toISOString()};
   const blob = new Blob([JSON.stringify(backup,null,2)],{type:"application/json"});
   const url = URL.createObjectURL(blob), link=document.createElement("a");
   link.href=url; link.download="rolex-key-adblocker-settings.json"; link.click(); URL.revokeObjectURL(url);
@@ -166,6 +168,7 @@ $("importFile").addEventListener("change", async (event) => {
     if (file.size > 1024*1024) throw new Error("File is larger than 1 MB.");
     const data=JSON.parse(await file.text());
     const patch={};
+    if(typeof data.autoSkipEnabled==="boolean")patch.autoSkipEnabled=data.autoSkipEnabled;
     if(data.segmentSkipOptions&&typeof data.segmentSkipOptions==="object"&&!Array.isArray(data.segmentSkipOptions))patch.segmentSkipOptions=Object.fromEntries(Object.keys(SEGMENT_SKIP_DEFAULTS).map(k=>[k,typeof data.segmentSkipOptions[k]==="boolean"?data.segmentSkipOptions[k]:SEGMENT_SKIP_DEFAULTS[k]]));
     if (typeof data.enabled==="boolean") patch.enabled=data.enabled;
     if (typeof data.trackersEnabled==="boolean") patch.trackersEnabled=data.trackersEnabled;
