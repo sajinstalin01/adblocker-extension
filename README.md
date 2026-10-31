@@ -7,11 +7,16 @@ Version 4.3.0 — Chromium Manifest V3 extension with expanded ad-network filter
 - Automatic GitHub release-feed checks every 6 hours, update badge/status and optional desktop notifications
 - Popup and Settings update notice with link to official GitHub releases
 - Permanent/temporary allowlists, custom blocked domains, import/export and local statistics
-- Advanced local dashboard with protection configuration score, activity timeline, per-site allowlist controls, element picker, custom selector rules, URL rule preview, runtime diagnostics, and debug console\n- Conservative mutation-aware page ad classification and optional floating-ad cleanup; optional cookie choice clicks only explicit reject/necessary-only controls\n- Heuristic hostname warnings and broken-page recovery hints; these are not complete phishing, malware, or page compatibility scanners\n- Separate counters for DNR network matches, page ad elements hidden, ad skip clicks and segment skips; popup totals and detailed Settings breakdown
+- Advanced local dashboard with protection configuration score, activity timeline, per-site allowlist controls, element picker, custom selector rules, URL rule preview, runtime diagnostics, and debug console
+- Conservative mutation-aware page ad classification and optional floating-ad cleanup; optional cookie choice clicks only explicit reject/necessary-only controls
+- Heuristic hostname warnings and broken-page recovery hints; these are not complete phishing, malware, or page compatibility scanners
+- Separate counters for DNR network matches, page ad elements hidden, ad skip clicks and segment skips; popup totals and detailed Settings breakdown
 - Balanced, Strict, Minimal and Custom protection profiles
 - Optional heuristic anti-adblock overlay detection
 - Real-time ad cleanup helper starts at document start and reacts to dynamically inserted page elements on supported video sites
-- Automatic ad skipping now clicks supported Skip Ad controls as soon as they become visible and enabled, including controls that transition from countdown/disabled to enabled; master toggle in Settings\n- Added SponsorBlock-style category metadata mapping and lower-overhead mutation coalescing/throttled detection\n- Added 12 configurable segment-skip categories (sponsor, promotions, self-promotion, unpaid plugs, non-music sections, intermissions, intros, end cards, credits, greetings, previews and recaps); works only where a supported marker or explicit skip control exists
+- Automatic ad skipping now clicks supported Skip Ad controls as soon as they become visible and enabled, including controls that transition from countdown/disabled to enabled; master toggle in Settings
+- Added SponsorBlock-style category metadata mapping and lower-overhead mutation coalescing/throttled detection
+- Added 12 configurable segment-skip categories (sponsor, promotions, self-promotion, unpaid plugs, non-music sections, intermissions, intros, end cards, credits, greetings, previews and recaps); works only where a supported marker or explicit skip control exists
 - Improved explicit Skip Ad button detection: clicks only visible/enabled ad-skip controls, ignores Skip Intro/Recap/Next Episode, and rate-limits clicks; does not manipulate video playback or DRM
 - YouTube Shorts blocking toggle and cosmetic cleanup of clearly marked YouTube ad cards/overlays (best effort; in-stream ads are not guaranteed to be blocked)
 - Optional device-local settings sign-in with PBKDF2 password hashing; ad blocking remains active without sign-in
@@ -23,7 +28,10 @@ Version 4.3.0 — Chromium Manifest V3 extension with expanded ad-network filter
 - Popup compact/comfortable layout, accent colors and optional hidden statistics
 - Custom crowned-shield vector icon with generated 16/32/48/128 px PNG sizes, protection profile controls, and automated GitHub Actions validation; no remotely downloaded JavaScript
 
-## Advanced Control Center (4.2.0)\nOpen `advanced-dashboard.html` from Settings to view local activity, network/action timeline, website controls, element picker, custom cosmetic rules, simplified URL-rule testing, runtime diagnostics, appearance preferences and local debug events. The new page cleanup module uses conservative ad-label heuristics and excludes major page/player containers. Optional cookie cleanup clicks only explicit reject/necessary-only controls. Hostname warnings are heuristic only; this is not a complete phishing or malware scanner.\n\n## Custom extension icon
+## Advanced Control Center (4.2.0)
+Open `advanced-dashboard.html` from Settings to view local activity, network/action timeline, website controls, element picker, custom cosmetic rules, simplified URL-rule testing, runtime diagnostics, appearance preferences and local debug events. The new page cleanup module uses conservative ad-label heuristics and excludes major page/player containers. Optional cookie cleanup clicks only explicit reject/necessary-only controls. Hostname warnings are heuristic only; this is not a complete phishing or malware scanner.
+
+## Custom extension icon
 The vector source lives at `icons/rolex-key-adblocker.svg`. GitHub Actions generates 16, 32, 48, and 128 px PNG icons using `scripts/generate_icons.py`. The manifest uses PNG assets for the browser toolbar and extension listing.
 
 ## Releases and extension updates
