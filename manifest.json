@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Rolex Key AdBlocker",
-  "version": "4.1.0",
-  "description": "Ad blocker with detailed network, page cleanup, and skip-action statistics.",
+  "version": "4.2.0",
+  "description": "Advanced ad blocking with local analytics, element rules, diagnostics and configurable page cleanup.",
   "permissions": [
     "storage",
     "alarms",
@@ -46,7 +46,8 @@
         "content-ad-cleaner.js",
         "content-features.js",
         "content-streaming-cleaner.js",
-        "content-youtube.js"
+        "content-youtube.js",
+        "advanced-content.js"
       ],
       "run_at": "document_idle"
     }
