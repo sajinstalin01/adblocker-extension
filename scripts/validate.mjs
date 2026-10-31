@@ -49,4 +49,11 @@ assert.ok(read("content-live-ad-blocker.js").includes("SPONSORBLOCK_MAP"),"Suppo
 assert.ok(read("content-live-ad-blocker.js").includes("setTimeout(()=>{queued=false;run();},120)"),"Mutation scan throttle missing");
 assert.ok(read("content-live-ad-blocker.js").includes("settings.autoSkipEnabled"),"Automatic skip master toggle not enforced");
 assert.ok(JSON.parse(read("update-feed.json")).latestVersion==="4.3.0","Update feed version mismatch");
+assert.ok(m.version==="4.4.0","v4.4.0 release version missing");
+assert.ok(read("background.js").includes("autoSkipEnabled: true"),"Automatic skip default missing");
+assert.ok(read("options.html").includes('id="autoSkipEnabled"'),"Automatic skip master toggle missing");
+assert.ok(read("options.js").includes('$("autoSkipEnabled").checked=s.autoSkipEnabled!==false'),"Automatic skip preference is not rendered");
+assert.ok(read("content-live-ad-blocker.js").includes("requestAnimationFrame")&&read("content-live-ad-blocker.js").includes("pendingRoots"),"Targeted mutation batching missing");
+assert.ok(read("content-live-ad-blocker.js").includes("data-sponsorblock-category")&&read("content-live-ad-blocker.js").includes("autoSkipEnabled"),"Automatic segment/ad skip engine missing");
+assert.ok(read("content-live-ad-blocker.js").includes("function hidePageAds(root)")&&read("content-live-ad-blocker.js").includes("function autoSkip(root)"),"Targeted root scanning missing");
 console.log("All Rolex Key AdBlocker v"+m.version+" validation checks passed.");
