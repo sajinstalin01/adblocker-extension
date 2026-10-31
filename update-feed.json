@@ -1,16 +1,16 @@
 {
   "schemaVersion": 1,
-  "latestVersion": "4.5.0",
-  "title": "Ad intelligence, Dailymotion protection and local alerts",
-  "message": "Adds heuristic YouTube and Dailymotion ad-leak signals, anti-adblock warning detection and local notification history.",
+  "latestVersion": "4.6.0",
+  "title": "YouTube ad-leak notice and reporting",
+  "message": "Adds a rate-limited, configurable YouTube ad-leak notice with local reporting and dismissal controls.",
   "releaseUrl": "https://github.com/sajinstalin01/adblocker-extension/releases",
   "publishedAt": "2026-10-31",
   "features": [
-    "Heuristic YouTube ad-leak signals from visible markers and resource observations",
-    "Dailymotion-specific ad marker and resource detection",
-    "Anti-adblock warning detection and optional desktop notifications",
-    "Local event history with bounded storage and clear controls",
-    "Independent settings toggles with allowlist-aware behavior",
-    "Preserves existing filtering, allowlists, segment skipping and dashboard features"
+    "YouTube ad indicators monitored across distinct video IDs",
+    "Notice shown after indicators persist for at least 3 seconds across two videos",
+    "24-hour notice cooldown and 7-day dismissal suppression",
+    "Local report, dismiss and turn-off controls",
+    "Settings toggle and backup/restore support",
+    "Existing ad filtering, automatic skip and segment categories preserved"
   ]
 }
