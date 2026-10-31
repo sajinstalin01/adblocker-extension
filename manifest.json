@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Rolex Key AdBlocker",
-  "version": "4.6.0",
-  "description": "Advanced ad and segment skipping with YouTube ad-leak notices and local reporting.",
+  "version": "4.7.0",
+  "description": "Advanced ad filtering with expanded YouTube sponsored-placement cleanup, segment skipping and ad-leak notices.",
   "permissions": [
     "storage",
     "alarms",
