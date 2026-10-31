@@ -1,15 +1,15 @@
 {
   "schemaVersion": 1,
-  "latestVersion": "4.2.0",
-  "title": "Advanced Control Center and smart page cleanup",
-  "message": "Adds local analytics, website controls, element picker, custom cosmetic rules, diagnostics, configurable page cleanup and heuristic safety hints.",
+  "latestVersion": "4.3.0",
+  "title": "Automatic ad and segment skipping",
+  "message": "Faster automatic activation of supported Skip Ad and segment controls, configurable skip categories, and lower-overhead mutation handling.",
   "releaseUrl": "https://github.com/sajinstalin01/adblocker-extension/releases",
   "publishedAt": "2026-10-31",
   "features": [
-    "Advanced local analytics and network/action timeline",
-    "Element picker and per-domain cosmetic rules",
-    "Configurable mutation-aware ad cleanup and optional explicit cookie rejection",
-    "Runtime diagnostics, local debug console and appearance controls",
-    "Heuristic hostname warnings and page-load recovery hints; not a complete security scanner"
+    "Automatic click of visible and enabled Skip Ad controls, including countdown-to-enabled transitions",
+    "Twelve configurable segment categories with supported page metadata mapping",
+    "Master automatic-skip toggle and allowlist-aware behavior",
+    "Mutation coalescing and throttled scans to reduce page performance overhead",
+    "No media/DRM manipulation; ads without a supported skip control cannot be skipped"
   ]
 }
