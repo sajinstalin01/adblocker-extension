@@ -1,14 +1,15 @@
 {
   "schemaVersion": 1,
-  "latestVersion": "4.1.0",
-  "title": "Detailed ad blocking counters",
-  "message": "Shows separate totals for network requests matched, page ads hidden, ad skip clicks and segment skips.",
+  "latestVersion": "4.2.0",
+  "title": "Advanced Control Center and smart page cleanup",
+  "message": "Adds local analytics, website controls, element picker, custom cosmetic rules, diagnostics, configurable page cleanup and heuristic safety hints.",
   "releaseUrl": "https://github.com/sajinstalin01/adblocker-extension/releases",
-  "publishedAt": "2026-10-30",
+  "publishedAt": "2026-10-31",
   "features": [
-    "Popup counters for network requests, page ads hidden and skip actions",
-    "Settings breakdown for network matches, cosmetic hides, ad skips and segment skips",
-    "Local statistics reset and backup support",
-    "Counters are action totals, not estimates of unique ads or money saved"
+    "Advanced local analytics and network/action timeline",
+    "Element picker and per-domain cosmetic rules",
+    "Configurable mutation-aware ad cleanup and optional explicit cookie rejection",
+    "Runtime diagnostics, local debug console and appearance controls",
+    "Heuristic hostname warnings and page-load recovery hints; not a complete security scanner"
   ]
 }
