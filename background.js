@@ -14,6 +14,9 @@ const DEFAULTS = {
   skipClicks: 0,
   segmentSkips: 0,
   actionStatsBySite: {},
+  advancedSettings: { smartDetection: true, floatingAdCleanup: true, cookieCleanup: false, sponsorMarkers: true, phishingWarnings: true, customCssEnabled: true, debugMode: false, profile: "balanced", theme: "system", locale: "en", accent: "mint" },
+  customElementRules: {},
+  advancedEvents: [],
   statsBySite: {},
   recentBlocks: [],
   filterUpdate: { status: "not-run", updatedAt: null, message: "Not checked yet" },
@@ -326,6 +329,27 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
       actionStatsBySite[host] = {...(actionStatsBySite[host] || {}), [key]: ((actionStatsBySite[host] || {})[key] || 0) + 1};
       await chrome.storage.local.set({[key]:(s[key] || 0) + 1, actionStatsBySite});
     }).then(() => sendResponse({ok:true})).catch(() => sendResponse({ok:false}));
+    return true;
+  }
+  if (message?.type === "rolex-advanced-event") {
+    const event = message.event;
+    if (!event || typeof event.type !== "string" || typeof event.host !== "string") { sendResponse({ok:false}); return false; }
+    statsQueue = statsQueue.then(async () => {
+      const { advancedEvents = [] } = await chrome.storage.local.get({ advancedEvents: [] });
+      await chrome.storage.local.set({ advancedEvents: [{ type: event.type.slice(0,60), host: event.host.slice(0,253), detail: String(event.detail || "").slice(0,180), at: new Date().toISOString() }, ...advancedEvents].slice(0,250) });
+    }).then(() => sendResponse({ok:true})).catch(() => sendResponse({ok:false}));
+    return true;
+  }
+  if (message?.type === "rolex-save-element-rule") {
+    const host = normalizeDomain(message.host), selector = typeof message.selector === "string" ? message.selector.trim() : "";
+    if (!host || !selector || selector.length > 500 || /[{};]/.test(selector)) { sendResponse({ok:false}); return false; }
+    chrome.storage.local.get({ customElementRules: {} }).then(async data => {
+      const rules = { ...(data.customElementRules || {}) }, list = [...(rules[host] || [])];
+      if (!list.some(item => item.selector === selector)) list.push({ selector, createdAt: new Date().toISOString() });
+      rules[host] = list.slice(-100);
+      await chrome.storage.local.set({ customElementRules: rules });
+      sendResponse({ok:true});
+    }).catch(() => sendResponse({ok:false}));
     return true;
   }
   if (message?.type === "get-tab-status") {
