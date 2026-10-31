@@ -28,7 +28,16 @@ Version 4.6.0 — Chromium Manifest V3 extension with expanded ad-network filter
 - Popup compact/comfortable layout, accent colors and optional hidden statistics
 - Custom crowned-shield vector icon with generated 16/32/48/128 px PNG sizes, protection profile controls, and automated GitHub Actions validation; no remotely downloaded JavaScript
 
-## Ad intelligence and alerts (4.5.0)\n- Added original, heuristic YouTube ad-leak signals from visible ad markers and advertising-related resource observations.\n- Added a YouTube ad-leak notice after ad indicators persist for at least 3 seconds across two distinct videos.\n- Added local report, dismiss and opt-out controls; notices are rate-limited to once per 24 hours and dismissal suppresses them for 7 days.\n- Added an independent settings toggle for YouTube ad-leak notices. Detection is heuristic and does not prove that an ad played or identify every ad.\n- Added conservative Dailymotion ad-marker and resource detection. These detections report possible ads; they do not guarantee network-level removal.\n- Added explicit anti-adblock warning detection and a local event history with optional desktop notifications.\n- Added independent settings toggles, allowlist-aware operation, event deduplication and bounded history. No third-party code, icons, fonts or branding from the supplied archive are included.\n\n## Advanced Control Center (4.2.0)
+## Ad intelligence and alerts (4.6.0)
+- Added original, heuristic YouTube ad-leak signals from visible ad markers and advertising-related resource observations.
+- Added a YouTube ad-leak notice after ad indicators persist for at least 3 seconds across two distinct videos.
+- Added local report, dismiss and opt-out controls; notices are rate-limited to once per 24 hours and dismissal suppresses them for 7 days.
+- Added an independent settings toggle for YouTube ad-leak notices. Detection is heuristic and does not prove that an ad played or identify every ad.
+- Added conservative Dailymotion ad-marker and resource detection. These detections report possible ads; they do not guarantee network-level removal.
+- Added explicit anti-adblock warning detection and a local event history with optional desktop notifications.
+- Added independent settings toggles, allowlist-aware operation, event deduplication and bounded history. No third-party code, icons, fonts or branding from the supplied archive are included.
+
+## Advanced Control Center (4.2.0)
 Open `advanced-dashboard.html` from Settings to view local activity, network/action timeline, website controls, element picker, custom cosmetic rules, simplified URL-rule testing, runtime diagnostics, appearance preferences and local debug events. The new page cleanup module uses conservative ad-label heuristics and excludes major page/player containers. Optional cookie cleanup clicks only explicit reject/necessary-only controls. Hostname warnings are heuristic only; this is not a complete phishing or malware scanner.
 
 ## Custom extension icon
