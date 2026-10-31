@@ -1,6 +1,6 @@
 # Rolex Key AdBlocker
 
-Version 4.3.0 — Chromium Manifest V3 extension with expanded ad-network filtering, early-running live ad cleanup, improved explicit Skip Ad detection, and hardened filter validation.
+Version 4.4.0 — Chromium Manifest V3 extension with expanded ad-network filtering, early-running live ad cleanup, improved explicit Skip Ad detection, and hardened filter validation.
 
 ## Features
 - Expanded bundled ad network filtering (84 static rules), tracker, pop-up and optional known cryptomining-script filtering; safe daily/manual JSON filter refresh
