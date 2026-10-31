@@ -20,7 +20,7 @@ const DEFAULTS = {
   adNotificationsEnabled: true,
   adLeakNoticesEnabled: true,
   adLeakEvents: [],
-  adLeakNoticeState: {count:0,videoIds:[],lastShownAt:0,dismissedAt:0,optOut:false,reported:0},
+  rolexAdLeakNoticeState: {count:0,videoIds:[],lastShownAt:0,dismissedAt:0,optOut:false,reported:0},
   actionStatsBySite: {},
   advancedSettings: { smartDetection: true, floatingAdCleanup: true, cookieCleanup: false, sponsorMarkers: true, phishingWarnings: true, customCssEnabled: true, debugMode: false, profile: "balanced", theme: "system", locale: "en", accent: "mint" },
   customElementRules: {},
