@@ -1,6 +1,6 @@
 # Rolex Key AdBlocker
 
-Version 4.4.0 — Chromium Manifest V3 extension with expanded ad-network filtering, early-running live ad cleanup, improved explicit Skip Ad detection, and hardened filter validation.
+Version 4.5.0 — Chromium Manifest V3 extension with expanded ad-network filtering, early-running live ad cleanup, improved explicit Skip Ad detection, and hardened filter validation.
 
 ## Features
 - Expanded bundled ad network filtering (84 static rules), tracker, pop-up and optional known cryptomining-script filtering; safe daily/manual JSON filter refresh
@@ -28,7 +28,7 @@ Version 4.4.0 — Chromium Manifest V3 extension with expanded ad-network filter
 - Popup compact/comfortable layout, accent colors and optional hidden statistics
 - Custom crowned-shield vector icon with generated 16/32/48/128 px PNG sizes, protection profile controls, and automated GitHub Actions validation; no remotely downloaded JavaScript
 
-## Advanced Control Center (4.2.0)
+## Ad intelligence and alerts (4.5.0)\n- Added original, heuristic YouTube ad-leak signals from visible ad markers and advertising-related resource observations.\n- Added conservative Dailymotion ad-marker and resource detection. These detections report possible ads; they do not guarantee network-level removal.\n- Added explicit anti-adblock warning detection and a local event history with optional desktop notifications.\n- Added independent settings toggles, allowlist-aware operation, event deduplication and bounded history. No third-party code, icons, fonts or branding from the supplied archive are included.\n\n## Advanced Control Center (4.2.0)
 Open `advanced-dashboard.html` from Settings to view local activity, network/action timeline, website controls, element picker, custom cosmetic rules, simplified URL-rule testing, runtime diagnostics, appearance preferences and local debug events. The new page cleanup module uses conservative ad-label heuristics and excludes major page/player containers. Optional cookie cleanup clicks only explicit reject/necessary-only controls. Hostname warnings are heuristic only; this is not a complete phishing or malware scanner.
 
 ## Custom extension icon
