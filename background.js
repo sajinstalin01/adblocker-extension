@@ -14,6 +14,11 @@ const DEFAULTS = {
   skipClicks: 0,
   segmentSkips: 0,
   autoSkipEnabled: true,
+  adLeakDetectionEnabled: true,
+  dailymotionProtectionEnabled: true,
+  antiAdblockAlertsEnabled: true,
+  adNotificationsEnabled: true,
+  adLeakEvents: [],
   actionStatsBySite: {},
   advancedSettings: { smartDetection: true, floatingAdCleanup: true, cookieCleanup: false, sponsorMarkers: true, phishingWarnings: true, customCssEnabled: true, debugMode: false, profile: "balanced", theme: "system", locale: "en", accent: "mint" },
   customElementRules: {},
@@ -330,6 +335,30 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
       actionStatsBySite[host] = {...(actionStatsBySite[host] || {}), [key]: ((actionStatsBySite[host] || {})[key] || 0) + 1};
       await chrome.storage.local.set({[key]:(s[key] || 0) + 1, actionStatsBySite});
     }).then(() => sendResponse({ok:true})).catch(() => sendResponse({ok:false}));
+    return true;
+  }
+  if (message?.type === "rolex-ad-intelligence-event") {
+    const event = message.event || {};
+    const allowedTypes = ["ad-leak","anti-adblock-warning","dailymotion-ad-marker"];
+    const host = (() => { try { return new URL(_sender.url || _sender.tab?.url || "").hostname.toLowerCase(); } catch (_) { return ""; } })();
+    if (!allowedTypes.includes(event.type) || !host || typeof event.detail !== "string") { sendResponse({ok:false}); return false; }
+    statsQueue = statsQueue.then(async () => {
+      const { adLeakEvents = [], adLeakCount = 0, antiAdblockWarningCount = 0 } = await chrome.storage.local.get({adLeakEvents:[],adLeakCount:0,antiAdblockWarningCount:0});
+      const item = {type:event.type,host,detail:event.detail.slice(0,140),at:new Date().toISOString()};
+      const patch = {adLeakEvents:[item,...adLeakEvents].slice(0,100)};
+      if(event.type === "ad-leak") patch.adLeakCount = adLeakCount + 1;
+      if(event.type === "anti-adblock-warning") patch.antiAdblockWarningCount = antiAdblockWarningCount + 1;
+      await chrome.storage.local.set(patch);
+      const s = await getSettings();
+      if(s.adNotificationsEnabled !== false && event.type !== "dailymotion-ad-marker") {
+        const title = event.type === "anti-adblock-warning" ? "Anti-adblock warning detected" : "Possible ad leak detected";
+        const messageText = host + ": " + event.detail.slice(0,100);
+        if(chrome.notifications && chrome.permissions) {
+          const granted = await chrome.permissions.contains({permissions:["notifications"]}).catch(()=>false);
+          if(granted) chrome.notifications.create("rolex-ad-intel-"+Date.now(),{type:"basic",iconUrl:"icons/icon128.png",title,message:messageText},()=>{});
+        }
+      }
+    }).then(()=>sendResponse({ok:true})).catch(()=>sendResponse({ok:false}));
     return true;
   }
   if (message?.type === "rolex-advanced-event") {
