@@ -1,13 +1,13 @@
 # Rolex Key AdBlocker
 
-Version 4.1.0 — Chromium Manifest V3 extension with expanded ad-network filtering, early-running live ad cleanup, improved explicit Skip Ad detection, and hardened filter validation.
+Version 4.2.0 — Chromium Manifest V3 extension with expanded ad-network filtering, early-running live ad cleanup, improved explicit Skip Ad detection, and hardened filter validation.
 
 ## Features
 - Expanded bundled ad network filtering (84 static rules), tracker, pop-up and optional known cryptomining-script filtering; safe daily/manual JSON filter refresh
 - Automatic GitHub release-feed checks every 6 hours, update badge/status and optional desktop notifications
 - Popup and Settings update notice with link to official GitHub releases
 - Permanent/temporary allowlists, custom blocked domains, import/export and local statistics
-- Separate counters for DNR network matches, page ad elements hidden, ad skip clicks and segment skips; popup totals and detailed Settings breakdown
+- Advanced local dashboard with protection configuration score, activity timeline, per-site allowlist controls, element picker, custom selector rules, URL rule preview, runtime diagnostics, and debug console\n- Conservative mutation-aware page ad classification and optional floating-ad cleanup; optional cookie choice clicks only explicit reject/necessary-only controls\n- Heuristic hostname warnings and broken-page recovery hints; these are not complete phishing, malware, or page compatibility scanners\n- Separate counters for DNR network matches, page ad elements hidden, ad skip clicks and segment skips; popup totals and detailed Settings breakdown
 - Balanced, Strict, Minimal and Custom protection profiles
 - Optional heuristic anti-adblock overlay detection
 - Real-time ad cleanup helper starts at document start and reacts to dynamically inserted page elements on supported video sites
@@ -23,7 +23,7 @@ Version 4.1.0 — Chromium Manifest V3 extension with expanded ad-network filter
 - Popup compact/comfortable layout, accent colors and optional hidden statistics
 - Custom crowned-shield vector icon with generated 16/32/48/128 px PNG sizes, protection profile controls, and automated GitHub Actions validation; no remotely downloaded JavaScript
 
-## Custom extension icon
+## Advanced Control Center (4.2.0)\nOpen `advanced-dashboard.html` from Settings to view local activity, network/action timeline, website controls, element picker, custom cosmetic rules, simplified URL-rule testing, runtime diagnostics, appearance preferences and local debug events. The new page cleanup module uses conservative ad-label heuristics and excludes major page/player containers. Optional cookie cleanup clicks only explicit reject/necessary-only controls. Hostname warnings are heuristic only; this is not a complete phishing or malware scanner.\n\n## Custom extension icon
 The vector source lives at `icons/rolex-key-adblocker.svg`. GitHub Actions generates 16, 32, 48, and 128 px PNG icons using `scripts/generate_icons.py`. The manifest uses PNG assets for the browser toolbar and extension listing.
 
 ## Releases and extension updates
