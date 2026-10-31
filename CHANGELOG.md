@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.2.0] - 2026-10-31
+- Added an Advanced Control Center with local statistics, action/network timeline, per-site allowlist controls, diagnostics and debug console.
+- Added a mutation-aware conservative page-ad classifier, floating-ad cleanup and optional explicit cookie rejection controls.
+- Added a page element picker with per-domain cosmetic rules, simplified URL rule preview and custom blocked-domain shortcut.
+- Added heuristic suspicious-host warnings and incomplete-page recovery hints.
+- Added local appearance, profile and cleanup preferences; documented limitations for heuristic detection and unsupported cloud/threat-intelligence services.
+
+
 ## [4.1.0] - 2026-10-30
 - Added separate counters for network requests matched by DNR, page ads hidden, ad skip clicks, and segment skips.
 - Added popup totals and detailed Settings statistics with local reset and backup support.
