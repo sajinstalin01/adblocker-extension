@@ -33,7 +33,7 @@ const LABEL_PATTERNS={
 const SPONSORBLOCK_MAP={sponsor:"sponsor",selfpromo:"selfPromotion",interaction:"greetings",intro:"intro",outro:"endcards",preview:"preview",music_offtopic:"nonMusic",filler:"intermission"};
 const host=location.hostname.toLowerCase(),supported=HOSTS.some(d=>host===d||host.endsWith("."+d));
 let settings={enabled:true,streamingCleanupEnabled:true,autoSkipEnabled:true,allowlist:[],temporaryAllowlist:{},segmentSkipOptions:DEFAULT_SEGMENTS};
-let ready=false,allowed=false,queued=false,lastActionAt=0,lastSettingsRead=0;
+let ready=false,allowed=false,queued=false,lastActionAt=0;
 const isAllowed=()=> (settings.allowlist||[]).some(d=>host===String(d).toLowerCase()||host.endsWith("."+String(d).toLowerCase()))||Object.entries(settings.temporaryAllowlist||{}).some(([d,t])=>Number(t)>Date.now()&&(host===d||host.endsWith("."+d)));
 async function readSettings(){try{settings=await chrome.storage.local.get(settings);allowed=isAllowed();ready=true;}catch(_){ready=true;allowed=true;}}
 function visible(el){if(!el?.isConnected||el.disabled||el.getAttribute("aria-disabled")==="true"||el.getAttribute("disabled")!==null)return false;const r=el.getBoundingClientRect();if(r.width<2||r.height<2)return false;const s=getComputedStyle(el);return s.display!=="none"&&s.visibility!=="hidden"&&Number(s.opacity||1)>.05&&s.pointerEvents!=="none";}
@@ -81,7 +81,7 @@ function hidePageAds(){
 }
 function restore(){for(const el of document.querySelectorAll("["+MARK+"]")){const d=el.dataset.rolexLiveAdDisplay||"",p=el.dataset.rolexLiveAdPriority||"";if(d)el.style.setProperty("display",d,p);else el.style.removeProperty("display");el.removeAttribute(MARK);delete el.dataset.rolexLiveAdDisplay;delete el.dataset.rolexLiveAdPriority;}}
 function run(){if(!ready)return;if(!settings.enabled||!settings.streamingCleanupEnabled||allowed){restore();return;}autoSkip();hidePageAds();}
-function queue(){if(queued)return;queued=true;requestAnimationFrame(()=>{queued=false;run();});}
+function queue(){if(queued)return;queued=true;setTimeout(()=>{queued=false;run();},120);}
 function onMutations(records){for(const r of records){if(r.type==="childList"&&r.addedNodes.length){queue();return;}if(r.type==="attributes"){queue();return;}}}
 chrome.storage.onChanged.addListener((changes,area)=>{if(area!=="local")return;for(const [k,v] of Object.entries(changes))settings[k]=v.newValue;allowed=isAllowed();queue();});
 const observer=new MutationObserver(onMutations);
