@@ -1,5 +1,14 @@
 # Changelog
 
+## [4.4.0] - 2026-10-31
+- Optimized player ad/segment skipping with cached settings and targeted scans of newly added or changed player controls.
+- Automatically clicks supported Skip Ad controls immediately when they become visible and enabled, including countdown-to-enabled transitions.
+- Improved segment marker lookup on child controls and preserved all 12 configurable segment categories and SponsorBlock-style metadata mappings.
+- Added per-element click throttling and requestAnimationFrame mutation batching to reduce repeated whole-page work.
+- Kept page-level ad cleanup independent from the automatic-skip master toggle, preserving allowlists and fail-open behavior.
+- Ads without an exposed skip control and server-side stitched/media-stream ads cannot be universally skipped before playback; no media or DRM manipulation.
+
+
 ## [4.3.0] - 2026-10-31
 - Rebuilt automatic ad/segment skip detection to act as soon as visible, enabled skip controls appear, including ad countdown controls and supported segment metadata.
 - Added a master automatic-skip setting while preserving the 12 individual segment category toggles and allowlist behavior.
