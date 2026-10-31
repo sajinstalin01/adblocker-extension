@@ -1,4 +1,4 @@
-# Changelog
+# Changelog\n\n## [4.5.0] - 2026-10-31\n- Added heuristic YouTube ad-leak detection using known visible ad markers and resource observations.\n- Added Dailymotion-specific ad marker and resource detection with conservative behavior.\n- Added anti-adblock warning detection, optional desktop alerts and a bounded local event history.\n- Added independent settings toggles and allowlist-aware event reporting.\n- Detection is best-effort and may produce false positives; no third-party archive code or assets were copied.\n
 
 ## [4.4.0] - 2026-10-31
 - Optimized player ad/segment skipping with cached settings and targeted scans of newly added or changed player controls.
