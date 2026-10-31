@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Rolex Key AdBlocker",
-  "version": "4.3.0",
-  "description": "Automatic supported ad and segment skip controls with configurable categories, early detection and optimized page cleanup.",
+  "version": "4.4.0",
+  "description": "Faster automatic ad and segment skipping with optimized player detection and configurable skip controls.",
   "permissions": [
     "storage",
     "alarms",
