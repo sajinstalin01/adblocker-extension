@@ -1,15 +1,15 @@
 {
   "schemaVersion": 1,
-  "latestVersion": "4.3.0",
-  "title": "Automatic ad and segment skipping",
-  "message": "Faster automatic activation of supported Skip Ad and segment controls, configurable skip categories, and lower-overhead mutation handling.",
+  "latestVersion": "4.4.0",
+  "title": "Optimized automatic ad and segment skipping",
+  "message": "Faster early player detection, automatic clicks on supported Skip Ad controls, improved segment metadata matching and reduced mutation scanning overhead.",
   "releaseUrl": "https://github.com/sajinstalin01/adblocker-extension/releases",
   "publishedAt": "2026-10-31",
   "features": [
-    "Automatic click of visible and enabled Skip Ad controls, including countdown-to-enabled transitions",
-    "Twelve configurable segment categories with supported page metadata mapping",
-    "Master automatic-skip toggle and allowlist-aware behavior",
-    "Mutation coalescing and throttled scans to reduce page performance overhead",
-    "No media/DRM manipulation; ads without a supported skip control cannot be skipped"
+    "Immediate auto-click when supported Skip Ad controls become visible and enabled",
+    "Countdown-to-enabled ad skip control detection",
+    "Twelve configurable segment categories with SponsorBlock-style marker mapping",
+    "Cached settings, targeted mutation scans, per-element click throttling and animation-frame batching",
+    "Page ad cleanup remains separate from auto-skip toggle; no media/DRM manipulation"
   ]
 }
