@@ -13,6 +13,7 @@ const DEFAULTS = {
   pageAdsHidden: 0,
   skipClicks: 0,
   segmentSkips: 0,
+  autoSkipEnabled: true,
   actionStatsBySite: {},
   advancedSettings: { smartDetection: true, floatingAdCleanup: true, cookieCleanup: false, sponsorMarkers: true, phishingWarnings: true, customCssEnabled: true, debugMode: false, profile: "balanced", theme: "system", locale: "en", accent: "mint" },
   customElementRules: {},
