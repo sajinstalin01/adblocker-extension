@@ -1,16 +1,16 @@
 {
   "schemaVersion": 1,
-  "latestVersion": "4.6.0",
-  "title": "YouTube ad-leak notice and reporting",
-  "message": "Adds a rate-limited, configurable YouTube ad-leak notice with local reporting and dismissal controls.",
+  "latestVersion": "4.7.0",
+  "title": "Expanded YouTube sponsored-placement cleanup",
+  "message": "Adds broader cosmetic cleanup for YouTube promoted modules, sponsored search placements, merch shelves, Shorts panels and visible ad badges.",
   "releaseUrl": "https://github.com/sajinstalin01/adblocker-extension/releases",
   "publishedAt": "2026-10-31",
   "features": [
-    "YouTube ad indicators monitored across distinct video IDs",
-    "Notice shown after indicators persist for at least 3 seconds across two videos",
-    "24-hour notice cooldown and 7-day dismissal suppression",
-    "Local report, dismiss and turn-off controls",
-    "Settings toggle and backup/restore support",
-    "Existing ad filtering, automatic skip and segment categories preserved"
+    "Additional YouTube ad-slot and sponsored-placement selectors",
+    "Promoted search, masthead and merch shelf cleanup",
+    "Shorts suggested-action and visible ad-badge cleanup",
+    "Newly hidden placements counted in local page-ad statistics",
+    "Existing allowlists, Shorts controls and ad-leak notices preserved",
+    "Cosmetic best-effort behavior; no player/API rewriting or DRM manipulation"
   ]
 }
