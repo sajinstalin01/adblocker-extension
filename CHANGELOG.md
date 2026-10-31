@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.7.0] - 2026-10-31
+- Expanded cosmetic cleanup for additional YouTube ad slots, promoted search placements, merch shelves, Shorts promotional panels and visible ad badges.
+- Added local page-ad action counting for the newly supported placements.
+- Preserved YouTube allowlists, Shorts settings, fail-open behavior and existing ad-leak notice controls.
+- Adapted selector concepts only; did not copy the supplied bundled background worker, remote telemetry, or scriptlets that rewrite player/API behavior.
+- Cleanup remains cosmetic and best-effort; in-stream/server-side ads are not guaranteed to be removed.
+
 ## [4.6.0] - 2026-10-31
 - Added a YouTube ad-leak notice after ad indicators persist for at least 3 seconds across two distinct videos.
 - Added local report, dismiss and opt-out controls with 24-hour notice cooldown and 7-day dismissal suppression.
