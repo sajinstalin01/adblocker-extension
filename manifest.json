@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Rolex Key AdBlocker",
-  "version": "4.2.0",
-  "description": "Advanced ad blocking with local analytics, element rules, diagnostics and configurable page cleanup.",
+  "version": "4.3.0",
+  "description": "Automatic supported ad and segment skip controls with configurable categories, early detection and optimized page cleanup.",
   "permissions": [
     "storage",
     "alarms",
