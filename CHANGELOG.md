@@ -1,4 +1,4 @@
-# Changelog
+# Changelog\n\n## [4.6.0] - 2026-10-31\n- Added a YouTube ad-leak notice after ad indicators persist for at least 3 seconds across two distinct videos.\n- Added local report, dismiss and opt-out controls with 24-hour notice cooldown and 7-day dismissal suppression.\n- Added a settings toggle and backup/restore support for the notice preference.\n- Detection is heuristic; it does not prove an ad played or guarantee detection on every playback session.\n
 
 ## [4.5.0] - 2026-10-31
 - Added heuristic YouTube ad-leak detection using known visible ad markers and resource observations.
