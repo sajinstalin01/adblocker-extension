@@ -1,15 +1,16 @@
 {
   "schemaVersion": 1,
-  "latestVersion": "4.4.0",
-  "title": "Advanced automatic ad and segment skipping",
-  "message": "Optimized automatic Skip Ad and segment detection with targeted player scans, support for countdown-enabled controls, configurable categories and lower page overhead.",
+  "latestVersion": "4.5.0",
+  "title": "Ad intelligence, Dailymotion protection and local alerts",
+  "message": "Adds heuristic YouTube and Dailymotion ad-leak signals, anti-adblock warning detection and local notification history.",
   "releaseUrl": "https://github.com/sajinstalin01/adblocker-extension/releases",
   "publishedAt": "2026-10-31",
   "features": [
-    "Automatic click of supported visible and enabled Skip Ad controls, including countdown-to-enabled transitions",
-    "Twelve configurable segment categories and SponsorBlock-style page metadata mapping",
-    "Master automatic-skip setting with allowlist-aware behavior",
-    "Targeted player-root scans, cached settings and animation-frame mutation batching",
-    "No media/DRM manipulation; ads without a supported skip control cannot be skipped"
+    "Heuristic YouTube ad-leak signals from visible markers and resource observations",
+    "Dailymotion-specific ad marker and resource detection",
+    "Anti-adblock warning detection and optional desktop notifications",
+    "Local event history with bounded storage and clear controls",
+    "Independent settings toggles with allowlist-aware behavior",
+    "Preserves existing filtering, allowlists, segment skipping and dashboard features"
   ]
 }
