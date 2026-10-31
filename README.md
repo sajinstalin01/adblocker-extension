@@ -1,6 +1,6 @@
 # Rolex Key AdBlocker
 
-Version 4.6.0 — Chromium Manifest V3 extension with expanded ad-network filtering, early-running live ad cleanup, improved explicit Skip Ad detection, and hardened filter validation.
+Version 4.7.0 — Chromium Manifest V3 extension with expanded ad-network filtering, early-running live ad cleanup, improved explicit Skip Ad detection, and hardened filter validation.
 
 ## Features
 - Expanded bundled ad network filtering (84 static rules), tracker, pop-up and optional known cryptomining-script filtering; safe daily/manual JSON filter refresh
@@ -27,6 +27,11 @@ Version 4.6.0 — Chromium Manifest V3 extension with expanded ad-network filter
 - Local permission/security auditor
 - Popup compact/comfortable layout, accent colors and optional hidden statistics
 - Custom crowned-shield vector icon with generated 16/32/48/128 px PNG sizes, protection profile controls, and automated GitHub Actions validation; no remotely downloaded JavaScript
+
+## YouTube placement cleanup (4.7.0)
+- Added extra selectors for YouTube promotional modules, offer/sticker/promotion shelves, sponsored search placements, masthead placements, merch shelves, Shorts suggested-action panels, and visible ad badges.
+- Counts newly hidden supported placements in the existing local page-ad statistics.
+- Uses cosmetic DOM cleanup only, honors the existing allowlist and master protection settings, and fails open when selectors change. It does not rewrite player responses, intercept media streams, or manipulate DRM.
 
 ## Ad intelligence and alerts (4.6.0)
 - Added original, heuristic YouTube ad-leak signals from visible ad markers and advertising-related resource observations.
